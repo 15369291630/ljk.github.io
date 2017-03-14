@@ -107,7 +107,7 @@ JDBC（Java Data Base Connectivity,java数据库连接）是一种用于执行SQ
 简单来说JDBC提供给我们程序对数据库之间的桥梁，使我们的程序操作数据库变得简单。利用JDBC可以使我们方便的操作数据库。
 
 使用JDBC的好处有了JDBC">
-<meta property="og:image" content="http://yoursite.com/liujiakuoyx.github.io/images/1.png">
+<meta property="og:image" content="http://yoursite.com/1.png">
 <meta property="og:image" content="http://yoursite.com/liujiakuoyx.github.io/images/2.png">
 <meta property="og:image" content="http://yoursite.com/liujiakuoyx.github.io/images/3.png">
 <meta property="og:image" content="http://yoursite.com/liujiakuoyx.github.io/images/4.png">
@@ -116,7 +116,7 @@ JDBC（Java Data Base Connectivity,java数据库连接）是一种用于执行SQ
 <meta property="og:image" content="http://yoursite.com/liujiakuoyx.github.io/images/7.png">
 <meta property="og:image" content="http://yoursite.com/liujiakuoyx.github.io/images/8.png">
 <meta property="og:image" content="http://yoursite.com/liujiakuoyx.github.io/images/9.png">
-<meta property="og:updated_time" content="2017-03-14T15:05:25.684Z">
+<meta property="og:updated_time" content="2017-03-14T15:26:55.053Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java使用JDBC对数据库操作简介">
 <meta name="twitter:description" content="Java利用JDBC数据库操作在学习之前我们首先了解一下什么是JDBC，JDBC有什么用。
@@ -127,7 +127,7 @@ JDBC（Java Data Base Connectivity,java数据库连接）是一种用于执行SQ
 简单来说JDBC提供给我们程序对数据库之间的桥梁，使我们的程序操作数据库变得简单。利用JDBC可以使我们方便的操作数据库。
 
 使用JDBC的好处有了JDBC">
-<meta name="twitter:image" content="http://yoursite.com/liujiakuoyx.github.io/images/1.png">
+<meta name="twitter:image" content="http://yoursite.com/1.png">
 
 
 
@@ -366,7 +366,7 @@ JDBC（Java Data Base Connectivity,java数据库连接）是一种用于执行SQ
 </ol>
 <h3 id="配置开发环境："><a href="#配置开发环境：" class="headerlink" title="配置开发环境："></a>配置开发环境：</h3><p>在这里你可以选择对应你数据库的Jar包，也可以下载多种数据库支持的Jar包。<br>由于我的数据库是MySQL，所以我使用专门的mysql-jdbc.jar<br>我使用的IDE是Eclipse，数据库管理工具是Navicat。</p>
 <ol>
-<li>导入Jar包<br>右击你的Java项目打开Properties–&gt;Java Build Path–&gt;Libaries–&gt;Add External JARs…找到Jar添加到你的工程<br><img src="liujiakuoyx.github.io/images/1.png" alt=""></li>
+<li>导入Jar包<br>右击你的Java项目打开Properties–&gt;Java Build Path–&gt;Libaries–&gt;Add External JARs…找到Jar添加到你的工程<br><img src="1.png" alt=""></li>
 <li><p>注册JDBC驱动程序<br>在使用JDBC之前需要注册这个驱动，我们利用反射注册这个驱动。</p>
  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Class.forName(&quot;com.myaql,jdbc.Driver&quot;);</div><div class="line">conn = (Connection)DriverManager.getConnection(URL, USER, PASSWORD);</div></pre></td></tr></table></figure>
 <p>通过反射注册MySQL的驱动程序，如果使用的是关于MySQL，SQL等多种数据库的集合，只需要把对应的驱动名填进去。</p>
