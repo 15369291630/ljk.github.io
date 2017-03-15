@@ -114,9 +114,9 @@ JDBC（Java Data Base Connectivity,java数据库连接）是一种用于执行SQ
 <meta property="og:image" content="http://github.com/liujiakuoyx/liujiakuoyx.github.io/images/5.png">
 <meta property="og:image" content="http://github.com/liujiakuoyx/liujiakuoyx.github.io/images/6.png">
 <meta property="og:image" content="http://github.com/liujiakuoyx/liujiakuoyx.github.io/images/7.png">
-<meta property="og:image" content="http://github.com/liujiakuoyx/liujiakuoyx.github.io/images/8.png">
+<meta property="og:image" content="http://github.com/liujiakuoyx/8.png">
 <meta property="og:image" content="http://github.com/liujiakuoyx/9.png">
-<meta property="og:updated_time" content="2017-03-15T02:42:56.256Z">
+<meta property="og:updated_time" content="2017-03-15T02:50:59.532Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java使用JDBC对数据库操作简介">
 <meta name="twitter:description" content="Java利用JDBC数据库操作在学习之前我们首先了解一下什么是JDBC，JDBC有什么用。
@@ -394,9 +394,12 @@ JDBC（Java Data Base Connectivity,java数据库连接）是一种用于执行SQ
 <li><p>ODBC </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Class.forName( &quot;sun.jdbc.odbc.JdbcOdbcDriver&quot; ); </div><div class="line">Connection conn = (Connection)DriverManager.getConnection( &quot;jdbc:dbc:&quot; + sDsn, sUsr, sPwd );</div></pre></td></tr></table></figure>
 </li>
+<li><p>DB2</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Class.forName(&quot;com.ibm.db2.jdbc.net.DB2Driver&quot;); </div><div class="line">String url=&quot;jdbc:db2://192.9.200.108:6789/SAMPLE&quot; </div><div class="line">conn = (Connection)DriverManager.getConnection( url, sUsr, sPwd );</div></pre></td></tr></table></figure>
+</li>
+<li><p>access由于access并不是作为一项服务运行，所以url的方法对他不适用。access可以通过odbc，也可以通过服务器映射路径的形式 找到.mdb文件,参见<a href="http://rmijdbc.objectweb.org/Access/access.html" target="_blank" rel="external">http://rmijdbc.objectweb.org/Access/access.html</a> </p>
+</li>
 </ol>
-<p>8.DB2<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Class.forName(&quot;com.ibm.db2.jdbc.net.DB2Driver&quot;); </div><div class="line">String url=&quot;jdbc:db2://192.9.200.108:6789/SAMPLE&quot; </div><div class="line">conn = (Connection)DriverManager.getConnection( url, sUsr, sPwd );</div></pre></td></tr></table></figure></p>
-<p>9.access由于access并不是作为一项服务运行，所以url的方法对他不适用。access可以通过odbc，也可以通过服务器映射路径的形式 找到.mdb文件,参见<a href="http://rmijdbc.objectweb.org/Access/access.html" target="_blank" rel="external">http://rmijdbc.objectweb.org/Access/access.html</a> </p>
 <ul>
 <li>MyDbComputerNameOrIP 是你的数据库虽在服务器 IP地址:端口号</li>
 </ul>
@@ -427,7 +430,7 @@ JDBC（Java Data Base Connectivity,java数据库连接）是一种用于执行SQ
 <p>Get(3); 结果：</p>
 <p><img src="liujiakuoyx.github.io/images/7.png" alt=""></p>
 <h3 id="模糊查询"><a href="#模糊查询" class="headerlink" title="模糊查询"></a>模糊查询</h3><p>我在表内添加了几天测试数据，我们利用SQL语句模糊查询表内name包含’小’的行。</p>
-<p><img src="liujiakuoyx.github.io/images/8.png" alt=""></p>
+<p><img src="8.png" alt=""></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public static void Get1(String name) throws Exception&#123;</div><div class="line">truetrueString sql=&quot;&quot;</div><div class="line">truetruetruetrue+ &quot; select * from student_table &quot;</div><div class="line">truetruetruetrue+ &quot; where name like ? &quot;;</div><div class="line">truetruePreparedStatement pt = conn.prepareStatement(sql);</div><div class="line">truetruept.setString(1, &quot;%&quot;+name+&quot;%&quot;);//模糊查询</div><div class="line">truetrueResultSet rs = pt.executeQuery();</div><div class="line">truetruewhile(rs.next())</div><div class="line">truetrue&#123;</div><div class="line">truetrueSystem.out.print(&quot;name: &quot;+rs.getString(&quot;name&quot;)+&quot; &quot;);</div><div class="line">truetrueSystem.out.print(&quot;sex: &quot;+rs.getInt(&quot;sex&quot;)+&quot; &quot;);</div><div class="line">truetrueSystem.out.print(&quot;age: &quot;+rs.getInt(&quot;age&quot;)+&quot; &quot;);</div><div class="line">truetrueSystem.out.println(&quot;birthday: &quot;+rs.getDate(&quot;birthday&quot;));</div><div class="line">truetrue&#125;</div><div class="line">true&#125;</div></pre></td></tr></table></figure>
 <p>执行Get1(“小”); 之后的结果：</p>
 <p><img src="9.png" alt=""></p>
