@@ -250,6 +250,162 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/03/15/Android跨程序共享数据，探究内容提供器/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="LiuJiaKuo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的学习笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/liujiakuoyx.github.io/2017/03/15/Android跨程序共享数据，探究内容提供器/" itemprop="url">
+                  Android跨程序共享数据，探究内容提供器
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-15T19:14:54+08:00">
+                2017-03-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Android跨程序共享数据，探究内容提供器"><a href="#Android跨程序共享数据，探究内容提供器" class="headerlink" title="Android跨程序共享数据，探究内容提供器"></a>Android跨程序共享数据，探究内容提供器</h1><blockquote>
+<p>《Android第一行代码》</p>
+</blockquote>
+<h2 id="内容提供器简介"><a href="#内容提供器简介" class="headerlink" title="内容提供器简介"></a>内容提供器简介</h2><p>内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。<br>不同文件储存和SharedPreferences储存中的两种全局可读写操作模式，内容提供器可以选择只对哪一部分数据进行共享，从而保证我们数据的安全性。<br>内容提供器主要有两种操作，一种是利用现有的内容提供器来读取和操作相应程序的数据，另一种是创建自己的内容提供器提供给其他程序使用。接下来我让我们学习这两种操作,本次我们先学习利用现有的内容提供器来读取和操作相应程序的数据的相应操作。</p>
+<h2 id="访问其他程序中的数据"><a href="#访问其他程序中的数据" class="headerlink" title="访问其他程序中的数据"></a>访问其他程序中的数据</h2><p>当一个程序通过内容提供器对其数据提供了外部访问接口，任何其他程序就都可以对这部分数据进行访问。Android系统自带的电话簿、短信、媒体播放器等程序都提供了类似的访问接口，这就使得第三方程序可以允许充分利用这部分的数据来实现更好的功能。接下来我们就来看看怎么使用这部分数据。</p>
+<h3 id="ContentResolver-的基本用法"><a href="#ContentResolver-的基本用法" class="headerlink" title="ContentResolver 的基本用法"></a>ContentResolver 的基本用法</h3><p>要使用其他程序提供的数据，就需要借助ContentResolver类，可以通过Context中的getContentResolver()方法获取到该类实例。ContentResolver中提供了一系列方法用于对数据的CRUD（增删改查）操作，其中insert()方法用于添加数据，update()方法用于更新数据，delete()方法用于删除数据，query()方法用于查询数据。这种操作类似于SQLiteDataBase的操作，但不同于SQLiteDataBase的是，ContentResolver中的增删改查操作不接收表明参数，而是接收一个Uri参数。这个参数被称为内容ERI。内容URI给内容提供器中的数据建立了唯一的标识，他主要是由两部分组成，权限（authority）和路径（path）。权限适用于对不同的应用程序作区分的，一般为了避免冲突，都会采用程序包名方式来进行命名。比如摸个程序的包名是com.example.app，那么该程序对应的权限就可以命名为 com.example.app.provider。路径则是用于对同一个应用程序中不同的表作区分的。比如你的应用程序有两张表table1、table2，那么内容URI就可以写成com.example.app.provider/table1和com.example.app.provider/table2。不过这样还不算是完整的内容URI，还需要加上我们的协议声明：</p>
+<blockquote>
+<p>content://com.example.app.provider/table1<br>  content://com.example.app.provider/table2</p>
+</blockquote>
+<p>这样我们就表明了我们想访问哪个程序里面的哪一个表。有了内容URI之后我们还需要把它解析成Uri对象，这样我们就可以把Uri对象传入。<br>解析的方法非常简单，代码如下：</p>
+<figure class="highlight plain"><figcaption><span>uri = Uri.parse("content://com.example.app.provider/table1"); ```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">现在我们就可以使用这个Uri对象来查询table1中的数据了，代码如下：</div></pre></td></tr></table></figure>
+<p>Cursor cursor = getContentResolver().qurey(<br>    uri,<br>    projection,<br>    selection,<br>    selectionArgs,<br>    sortOrder);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">参数说明：</div><div class="line"></div><div class="line">    uri             指定查询某个应用的某张表</div><div class="line">    projection      指定查询的列名</div><div class="line">    selection       指定 where 的约束条件</div><div class="line">    selectionArgs   为 where 中的占位符提供具体的值</div><div class="line">    sortOrder       指定查询的排列方式</div><div class="line"></div><div class="line">查询完成后返回一个Cursor对象，我们就可以将数据从Cursor对象中逐个读取出来。读取方式是通过移动游标的位置来遍历Cursor的所有行，然后在取出每一行相应的数据，代码如下：</div></pre></td></tr></table></figure></p>
+<p>if(cursor!=null){<br>    while(cursor.moveToNext()){<br>        String colum1 = corsor.getString(cursor.getColumnIndex(“column1”));<br>        int colum2 = corsor.getInt(cursor.getColumnIndex(“column2”));<br>    }<br>    cursor.close();<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">掌握了最难的查询，我们再来看看怎么在表内添加一条数据：</div></pre></td></tr></table></figure></p>
+<p>ContentValues v = new ContentValues();<br>v.put(“column1”,”newText”);<br>v.put(“column2”,1);<br>getContentResolver().insert(uri,v);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">可以看到，跟数据库的操作一样，我们依然是把数据封装在 ContentVakues 中，然后调用ContentResolver的insert()方法，将 Uri 和 ContentVakues 作为参数传入即可。</div><div class="line"></div><div class="line">让我们再来看看数据的更新：</div></pre></td></tr></table></figure></p>
+<p>ContentValues v = new ContentValues();<br>v.put(“column1”,”newText2”);<br>v.put(“column2”,111);<br>getContentResolver().update(uri, “column1 = ? and column2 = ?”, new String[]{“newText”,”1”});<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">然后是删除：</div></pre></td></tr></table></figure></p>
+<p>getContentResolver().delete(uri,”column2 = ?”, new String[]{“1”});<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">以上就是ContentResolver对数据的增删改查，看到这里相信好多人会期待最后会有一个具体的示例来巩固刚才学到的知识，接下来我们就利用学到的知识来读取手机电话簿的联系人信系。</div><div class="line"></div><div class="line">### 读取手机联系人信息</div><div class="line"></div><div class="line">对于示例的UI界面我就不再多说了，相信大家都会。我写一个方法来获取手机联系人的信息，把获取到的联系人信息通过return一个List返回给调用者，一共我们需要做三件事。</div><div class="line"></div><div class="line">- 新建一个联系人的Modle来映射我们的联系人信息</div><div class="line">- 在AndroidManifest.xml中添加访问联系人的权限（安卓版本6.0以下）</div><div class="line">- 编写我们的方法</div><div class="line"></div><div class="line">1. 假设我们想要拿到联系人的电话号和名称，我们就可以写这样一个简单的modle：</div></pre></td></tr></table></figure></p>
+<p>class Contact{<br>    private String name;<br>    private String num;</p>
+<pre><code>public void setName(String name){
+    this.name = name;
+}
+public String getName(){
+    return name;
+}
+public void setNum(String num){
+    this.num = num;
+}
+public String getNum(){
+    return num;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 因为我们需要读取手机联系人信息，所以我们需要在Androidmanifest.xml中添加读取联系人信息的权限：</div><div class="line"></div><div class="line">``` &lt;uses-permission android:name=&quot;android.permission.READ_CONTACTS&quot; /&gt;</div></pre></td></tr></table></figure></p>
+<ol>
+<li>现在我们开始写我们的方法，思路是这样的：<br>因为我们需要利用Context来get我们的ContentResolver实例，所以这个方法需要一个Context参数，并且要有一个List返回值把我们拿到的信息返回给调用者。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">public List&lt;Contact&gt; getContactDate(Context context)&#123;</div><div class="line">    List&lt;Contact&gt; list = new ArrayList&lt;&gt;();</div><div class="line">    Cursor c = null;</div><div class="line">    c = context.getContentResolver().query(</div><div class="line">        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,</div><div class="line">        null,null,null,null);</div><div class="line">    while(c.moveToNext)&#123;</div><div class="line">        Contact con = new Contact();</div><div class="line">        //添加联系人姓名</div><div class="line">        con.setName(c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)));</div><div class="line">        //添加联系人电话号</div><div class="line">        con.setNum(c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NUMBER)));</div><div class="line">        list.add(con);</div><div class="line">    &#125;</div><div class="line">    return list;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>到这里我们就把我们的工具方法写好了，当我们需要获取系人信息的时候，直接调用这个方法就能拿到手机电话簿中所有联系人的姓名和电话了。</p>
+<p>本篇到此结束，作揖。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/03/14/博客说明-1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -329,7 +485,7 @@
           
             <h1 id="博客说明"><a href="#博客说明" class="headerlink" title="博客说明"></a>博客说明</h1><ul>
 <li>我是在大一的时候了解的GitHub，到了大二接触到了利用GitHub建站的知识。由于感觉自己水平特别差，就没有写过文章。</li>
-<li>因为这个学期比较少，老是闲着也是荒废，就尝试着写写博客，菜鸟技术，勿喷。</li>
+<li>因为这个学期课比较少，老是闲着也是荒废，就尝试着写写博客，菜鸟技术，勿喷。</li>
 <li>我的博客主要是以Android、java技术为主。</li>
 <li>我的文章面向的是初学者。</li>
 </ul>
@@ -506,33 +662,33 @@
 </ul>
 <h3 id="遍历"><a href="#遍历" class="headerlink" title="遍历"></a>遍历</h3><p>在这里我新建了一个student的数据库，并且新建了一个student_table的表,并且添加了三条测试数据（SQL语句就不再赘述）：</p>
 <p><img src="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/2.png" alt=""></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Statement stmt = conn.createStatement();//利用conn拿到Statement</div><div class="line">truetrue//使用Statement.executeQuery()查询数据库，JDBC把查询返回的结果放进这个ResultSet对象内返回</div><div class="line">truetrueResultSet st =  stmt.executeQuery(&quot;select name,age,birthday from student_table&quot;);</div><div class="line">truetruewhile (st.next()) &#123;</div><div class="line">truetruetrueSystem.out.print(&quot;name: &quot;+st.getString(&quot;name&quot;)+&quot;  &quot;);</div><div class="line">truetruetrueSystem.out.print(&quot;age: &quot;+st.getInt(&quot;age&quot;)+&quot;  &quot;);</div><div class="line">truetruetrueSystem.out.println(&quot;age: &quot;+st.getDate(&quot;birthday&quot;));</div><div class="line">truetrue&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Statement stmt = conn.createStatement();//利用conn拿到Statement</div><div class="line">        //使用Statement.executeQuery()查询数据库，JDBC把查询返回的结果放进这个ResultSet对象内返回</div><div class="line">        ResultSet st =  stmt.executeQuery(&quot;select name,age,birthday from student_table&quot;);</div><div class="line">        while (st.next()) &#123;</div><div class="line">        System.out.print(&quot;name: &quot;+st.getString(&quot;name&quot;)+&quot;  &quot;);</div><div class="line">        System.out.print(&quot;age: &quot;+st.getInt(&quot;age&quot;)+&quot;  &quot;);</div><div class="line">        System.out.println(&quot;age: &quot;+st.getDate(&quot;birthday&quot;));</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
 <p>直接看结果：</p>
 <p><img src="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/3.png" alt=""></p>
 <h3 id="添加"><a href="#添加" class="headerlink" title="添加"></a>添加</h3><p>在对数据库的数据进行操作时，建议大家新建一个model数据类，来映射表内的数据：<br>StudetnData</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">public class StudentData &#123;</div><div class="line">trueprivate int _id;</div><div class="line">trueprivate String name;</div><div class="line">trueprivate int sex;</div><div class="line">trueprivate int age;</div><div class="line">trueprivate Date birthday;</div><div class="line">true</div><div class="line">truepublic int get_id() &#123;</div><div class="line">truetruereturn _id;</div><div class="line">true&#125;</div><div class="line">truepublic void set_id(int _id) &#123;</div><div class="line">truetruethis._id = _id;</div><div class="line">true&#125;</div><div class="line">truepublic String getName() &#123;</div><div class="line">truetruereturn name;</div><div class="line">true&#125;</div><div class="line">truepublic void setName(String name) &#123;</div><div class="line">truetruethis.name = name;</div><div class="line">true&#125;</div><div class="line">truepublic int getSex() &#123;</div><div class="line">truetruereturn sex;</div><div class="line">true&#125;</div><div class="line">truepublic void setSex(int sex) &#123;</div><div class="line">truetruethis.sex = sex;</div><div class="line">true&#125;</div><div class="line">truepublic int getAge() &#123;</div><div class="line">truetruereturn age;</div><div class="line">true&#125;</div><div class="line">truepublic void setAge(int age) &#123;</div><div class="line">truetruethis.age = age;</div><div class="line">true&#125;</div><div class="line">truepublic Date getBirthday() &#123;</div><div class="line">truetruereturn birthday;</div><div class="line">true&#125;</div><div class="line">truepublic void setBirthday(Date birthday) &#123;</div><div class="line">truetruethis.birthday = birthday;</div><div class="line">true&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">public class StudentData &#123;</div><div class="line">    private int _id;</div><div class="line">    private String name;</div><div class="line">    private int sex;</div><div class="line">    private int age;</div><div class="line">    private Date birthday;</div><div class="line">    </div><div class="line">    public int get_id() &#123;</div><div class="line">        return _id;</div><div class="line">    &#125;</div><div class="line">    public void set_id(int _id) &#123;</div><div class="line">        this._id = _id;</div><div class="line">    &#125;</div><div class="line">    public String getName() &#123;</div><div class="line">        return name;</div><div class="line">    &#125;</div><div class="line">    public void setName(String name) &#123;</div><div class="line">        this.name = name;</div><div class="line">    &#125;</div><div class="line">    public int getSex() &#123;</div><div class="line">        return sex;</div><div class="line">    &#125;</div><div class="line">    public void setSex(int sex) &#123;</div><div class="line">        this.sex = sex;</div><div class="line">    &#125;</div><div class="line">    public int getAge() &#123;</div><div class="line">        return age;</div><div class="line">    &#125;</div><div class="line">    public void setAge(int age) &#123;</div><div class="line">        this.age = age;</div><div class="line">    &#125;</div><div class="line">    public Date getBirthday() &#123;</div><div class="line">        return birthday;</div><div class="line">    &#125;</div><div class="line">    public void setBirthday(Date birthday) &#123;</div><div class="line">        this.birthday = birthday;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
 <p>添加操作：</p>
 <p>我们可以利用JDBC的PreparedStatement类来执行我们的SQL语句</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">public static void Add(StudentData st) throws Exception&#123;</div><div class="line">truetrueString sql=&quot;&quot;</div><div class="line">truetruetruetrue+ &quot;insert into student_table&quot;</div><div class="line">truetruetruetrue+ &quot;(name,sex,age,birthday)&quot;</div><div class="line">truetruetruetrue+ &quot;values(?,?,?,?)&quot;;//我们使用占位符</div><div class="line">truetruePreparedStatement pt = conn.prepareStatement(sql);//新建PreparedStatement对象</div><div class="line">truetruept.setString(1, st.getName());//填写具体数据，简单可以理解为对应前边的第几个’？’</div><div class="line">truetruept.setInt(2, st.getSex());</div><div class="line">truetruept.setInt(3, st.getAge());</div><div class="line">truetruept.setDate(4, new Date(st.getBirthday().getTime()));</div><div class="line">truetruept.execute();//执行SQL语句</div><div class="line">true&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">StudentData st = new StudentData();</div><div class="line">truetruest.setName(&quot;小王&quot;);</div><div class="line">truetruest.setSex(1);</div><div class="line">truetruest.setAge(26);</div><div class="line">truetruest.setBirthday(new Date());</div><div class="line">truetrueAdd(st);</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">public static void Add(StudentData st) throws Exception&#123;</div><div class="line">        String sql=&quot;&quot;</div><div class="line">                + &quot;insert into student_table&quot;</div><div class="line">                + &quot;(name,sex,age,birthday)&quot;</div><div class="line">                + &quot;values(?,?,?,?)&quot;;//我们使用占位符</div><div class="line">        PreparedStatement pt = conn.prepareStatement(sql);//新建PreparedStatement对象</div><div class="line">        pt.setString(1, st.getName());//填写具体数据，简单可以理解为对应前边的第几个’？’</div><div class="line">        pt.setInt(2, st.getSex());</div><div class="line">        pt.setInt(3, st.getAge());</div><div class="line">        pt.setDate(4, new Date(st.getBirthday().getTime()));</div><div class="line">        pt.execute();//执行SQL语句</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">StudentData st = new StudentData();</div><div class="line">        st.setName(&quot;小王&quot;);</div><div class="line">        st.setSex(1);</div><div class="line">        st.setAge(26);</div><div class="line">        st.setBirthday(new Date());</div><div class="line">        Add(st);</div></pre></td></tr></table></figure>
 <p>运行结果：</p>
 <p><img src="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/4.png" alt=""></p>
 <h3 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h3><p>我们利用ID来进行删除</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public static void Delete(int _id) throws Exception&#123;</div><div class="line">trueString sql=&quot;&quot;</div><div class="line">truetruetrue+ &quot; delete from student_table&quot;</div><div class="line">truetruetrue+ &quot; where id=?&quot;;</div><div class="line">truePreparedStatement pt = conn.prepareStatement(sql);</div><div class="line">truept.setInt(1, _id);</div><div class="line">truept.execute();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public static void Delete(int _id) throws Exception&#123;</div><div class="line">    String sql=&quot;&quot;</div><div class="line">            + &quot; delete from student_table&quot;</div><div class="line">            + &quot; where id=?&quot;;</div><div class="line">    PreparedStatement pt = conn.prepareStatement(sql);</div><div class="line">    pt.setInt(1, _id);</div><div class="line">    pt.execute();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Delete(1)</div></pre></td></tr></table></figure>
 <p>执行结果：</p>
 <p><img src="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/5.png" alt=""></p>
-<h3 id="更新（修改）"><a href="#更新（修改）" class="headerlink" title="更新（修改）"></a>更新（修改）</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public static void UpDate(StudentData st) throws Exception&#123;</div><div class="line">trueString sql=&quot;&quot;</div><div class="line">truetruetrue+ &quot; update student_table&quot;</div><div class="line">truetruetrue+ &quot; set name=?,sex=?,age=?,birthday=?&quot;</div><div class="line">truetruetrue+ &quot; where id=?&quot;;</div><div class="line">truePreparedStatement pt = conn.prepareStatement(sql);</div><div class="line">truept.setString(1, st.getName());</div><div class="line">truept.setInt(2, st.getSex());</div><div class="line">truept.setInt(3, st.getAge());</div><div class="line">truept.setDate(4, new Date(st.getBirthday().getTime()));</div><div class="line">truept.setInt(5, st.get_id());</div><div class="line">truept.execute();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="更新（修改）"><a href="#更新（修改）" class="headerlink" title="更新（修改）"></a>更新（修改）</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public static void UpDate(StudentData st) throws Exception&#123;</div><div class="line">    String sql=&quot;&quot;</div><div class="line">            + &quot; update student_table&quot;</div><div class="line">            + &quot; set name=?,sex=?,age=?,birthday=?&quot;</div><div class="line">            + &quot; where id=?&quot;;</div><div class="line">    PreparedStatement pt = conn.prepareStatement(sql);</div><div class="line">    pt.setString(1, st.getName());</div><div class="line">    pt.setInt(2, st.getSex());</div><div class="line">    pt.setInt(3, st.getAge());</div><div class="line">    pt.setDate(4, new Date(st.getBirthday().getTime()));</div><div class="line">    pt.setInt(5, st.get_id());</div><div class="line">    pt.execute();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>通过id来修改该行参数：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">StudentData st = new StudentData();</div><div class="line">truetruest.set_id(2);</div><div class="line">truetruest.setName(&quot;小马&quot;);</div><div class="line">truetruest.setSex(1);</div><div class="line">truetruest.setAge(66);</div><div class="line">truetruest.setBirthday(new Date());		</div><div class="line">truetrueUpDate(st);</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">StudentData st = new StudentData();</div><div class="line">        st.set_id(2);</div><div class="line">        st.setName(&quot;小马&quot;);</div><div class="line">        st.setSex(1);</div><div class="line">        st.setAge(66);</div><div class="line">        st.setBirthday(new Date());		</div><div class="line">        UpDate(st);</div></pre></td></tr></table></figure>
 <p>运行结果：</p>
 <p><img src="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/6.png" alt=""></p>
-<h3 id="查找"><a href="#查找" class="headerlink" title="查找"></a>查找</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public static void Get(Integer _id) throws Exception&#123;</div><div class="line">truetrueString sql=&quot;&quot;</div><div class="line">truetruetruetrue+ &quot; select * from student_table &quot;</div><div class="line">truetruetruetrue+ &quot; where id=? &quot;;</div><div class="line">truetruePreparedStatement pt = conn.prepareStatement(sql);</div><div class="line">truetruept.setInt(1, _id);</div><div class="line">truetrueResultSet rs = pt.executeQuery();//注意这里使用的是executeQuery();</div><div class="line">truetruewhile(rs.next())</div><div class="line">truetrue&#123;</div><div class="line">truetrueSystem.out.print(&quot;name: &quot;+rs.getString(&quot;name&quot;)+&quot; &quot;);</div><div class="line">truetrueSystem.out.print(&quot;sex: &quot;+rs.getInt(&quot;sex&quot;)+&quot; &quot;);</div><div class="line">truetrueSystem.out.print(&quot;age: &quot;+rs.getInt(&quot;age&quot;)+&quot; &quot;);</div><div class="line">truetrueSystem.out.println(&quot;birthday: &quot;+rs.getDate(&quot;birthday&quot;));</div><div class="line">truetrue&#125;</div><div class="line">true&#125;</div></pre></td></tr></table></figure>
+<h3 id="查找"><a href="#查找" class="headerlink" title="查找"></a>查找</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public static void Get(Integer _id) throws Exception&#123;</div><div class="line">        String sql=&quot;&quot;</div><div class="line">                + &quot; select * from student_table &quot;</div><div class="line">                + &quot; where id=? &quot;;</div><div class="line">        PreparedStatement pt = conn.prepareStatement(sql);</div><div class="line">        pt.setInt(1, _id);</div><div class="line">        ResultSet rs = pt.executeQuery();//注意这里使用的是executeQuery();</div><div class="line">        while(rs.next())</div><div class="line">        &#123;</div><div class="line">        System.out.print(&quot;name: &quot;+rs.getString(&quot;name&quot;)+&quot; &quot;);</div><div class="line">        System.out.print(&quot;sex: &quot;+rs.getInt(&quot;sex&quot;)+&quot; &quot;);</div><div class="line">        System.out.print(&quot;age: &quot;+rs.getInt(&quot;age&quot;)+&quot; &quot;);</div><div class="line">        System.out.println(&quot;birthday: &quot;+rs.getDate(&quot;birthday&quot;));</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
 <p>Get(3); 结果：</p>
 <p><img src="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/7.png" alt=""></p>
 <h3 id="模糊查询"><a href="#模糊查询" class="headerlink" title="模糊查询"></a>模糊查询</h3><p>我在表内添加了几天测试数据，我们利用SQL语句模糊查询表内name包含’小’的行。</p>
 <p><img src="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/8.png" alt=""></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public static void Get1(String name) throws Exception&#123;</div><div class="line">truetrueString sql=&quot;&quot;</div><div class="line">truetruetruetrue+ &quot; select * from student_table &quot;</div><div class="line">truetruetruetrue+ &quot; where name like ? &quot;;</div><div class="line">truetruePreparedStatement pt = conn.prepareStatement(sql);</div><div class="line">truetruept.setString(1, &quot;%&quot;+name+&quot;%&quot;);//模糊查询</div><div class="line">truetrueResultSet rs = pt.executeQuery();</div><div class="line">truetruewhile(rs.next())</div><div class="line">truetrue&#123;</div><div class="line">truetrueSystem.out.print(&quot;name: &quot;+rs.getString(&quot;name&quot;)+&quot; &quot;);</div><div class="line">truetrueSystem.out.print(&quot;sex: &quot;+rs.getInt(&quot;sex&quot;)+&quot; &quot;);</div><div class="line">truetrueSystem.out.print(&quot;age: &quot;+rs.getInt(&quot;age&quot;)+&quot; &quot;);</div><div class="line">truetrueSystem.out.println(&quot;birthday: &quot;+rs.getDate(&quot;birthday&quot;));</div><div class="line">truetrue&#125;</div><div class="line">true&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public static void Get1(String name) throws Exception&#123;</div><div class="line">        String sql=&quot;&quot;</div><div class="line">                + &quot; select * from student_table &quot;</div><div class="line">                + &quot; where name like ? &quot;;</div><div class="line">        PreparedStatement pt = conn.prepareStatement(sql);</div><div class="line">        pt.setString(1, &quot;%&quot;+name+&quot;%&quot;);//模糊查询</div><div class="line">        ResultSet rs = pt.executeQuery();</div><div class="line">        while(rs.next())</div><div class="line">        &#123;</div><div class="line">        System.out.print(&quot;name: &quot;+rs.getString(&quot;name&quot;)+&quot; &quot;);</div><div class="line">        System.out.print(&quot;sex: &quot;+rs.getInt(&quot;sex&quot;)+&quot; &quot;);</div><div class="line">        System.out.print(&quot;age: &quot;+rs.getInt(&quot;age&quot;)+&quot; &quot;);</div><div class="line">        System.out.println(&quot;birthday: &quot;+rs.getDate(&quot;birthday&quot;));</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
 <p>执行Get1(“小”); 之后的结果：</p>
 <p><img src="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/9.png" alt=""></p>
 <p> 到这里使用JBDC对数据库的增删改查操作就讲解完了，希望大家能Get到你想要的知识。</p>
@@ -616,7 +772,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/liujiakuoyx.github.io/archives">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -629,7 +785,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/liujiakuoyx.github.io/tags/index.html">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
