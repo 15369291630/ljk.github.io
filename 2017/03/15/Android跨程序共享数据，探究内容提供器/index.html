@@ -99,7 +99,7 @@
 《Android第一行代码》
 
 内容提供器简介内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。不同文件储存和SharedPreferences储存中">
-<meta property="og:updated_time" content="2017-03-15T13:03:01.244Z">
+<meta property="og:updated_time" content="2017-03-16T11:41:07.813Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android跨程序共享数据，探究内容提供器">
 <meta name="twitter:description" content="Android跨程序共享数据，探究内容提供器
@@ -372,8 +372,11 @@ sortOrder       指定查询的排列方式
 <ol>
 <li>因为我们需要读取手机联系人信息，所以我们需要在Androidmanifest.xml中添加读取联系人信息的权限：</li>
 </ol>
-<figure class="highlight plain"><figcaption><span>android:name="android.permission.READ_CONTACTS"</span><a href="/>">```</a></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 现在我们开始写我们的方法，思路是这样的：</div><div class="line">因为我们需要利用Context来get我们的ContentResolver实例，所以这个方法需要一个Context参数，并且要有一个List返回值把我们拿到的信息返回给调用者。</div></pre></td></tr></table></figure>
-<p>public List<contact> getContactDate(Context context){<br>    List<contact> list = new ArrayList&lt;&gt;();<br>    Cursor c = null;<br>    c = context.getContentResolver().query(<br>        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,<br>        null,null,null,null);<br>    while(c.moveToNext){<br>        Contact con = new Contact();<br>        //添加联系人姓名<br>        con.setName(c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)));<br>        //添加联系人电话号<br>        con.setNum(c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NUMBER)));<br>        list.add(con);<br>    }<br>    return list;<br>}<br>```</contact></contact></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;uses-permission android:name=&quot;android.permission.READ_CONTACTS&quot; /&gt;</div></pre></td></tr></table></figure>
+<ol>
+<li>现在我们开始写我们的方法，思路是这样的：<br>因为我们需要利用Context来get我们的ContentResolver实例，所以这个方法需要一个Context参数，并且要有一个List返回值把我们拿到的信息返回给调用者。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">public List&lt;Contact&gt; getContactDate(Context context)&#123;</div><div class="line">    List&lt;Contact&gt; list = new ArrayList&lt;&gt;();</div><div class="line">    Cursor c = null;</div><div class="line">    c = context.getContentResolver().query(</div><div class="line">        ContactsContract.CommonDataKinds.Phone.CONTENT_URI,</div><div class="line">        null,null,null,null);</div><div class="line">    while(c.moveToNext)&#123;</div><div class="line">        Contact con = new Contact();</div><div class="line">        //添加联系人姓名</div><div class="line">        con.setName(c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)));</div><div class="line">        //添加联系人电话号</div><div class="line">        con.setNum(c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NUMBER)));</div><div class="line">        list.add(con);</div><div class="line">    &#125;</div><div class="line">    return list;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>到这里我们就把我们的工具方法写好了，当我们需要获取系人信息的时候，直接调用这个方法就能拿到手机电话簿中所有联系人的姓名和电话了。</p>
 <p>本篇到此结束，作揖。</p>
 
