@@ -1,0 +1,705 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/liujiakuoyx.github.io/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/liujiakuoyx.github.io/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/liujiakuoyx.github.io/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/liujiakuoyx.github.io/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="Android跨程序共享数据，探究内容提供器(进阶篇)上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。其实把我们程序的数据提供给其他应用程序使用有好多方式，比如我们把数据写到">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android跨程序共享数据，探究内容提供器(进阶篇)">
+<meta property="og:url" content="http://github.com/2017/03/16/Android跨程序共享数据，探究内容提供器-进阶篇/index.html">
+<meta property="og:site_name" content="我的学习笔记">
+<meta property="og:description" content="Android跨程序共享数据，探究内容提供器(进阶篇)上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。其实把我们程序的数据提供给其他应用程序使用有好多方式，比如我们把数据写到">
+<meta property="og:updated_time" content="2017-03-16T14:30:59.123Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android跨程序共享数据，探究内容提供器(进阶篇)">
+<meta name="twitter:description" content="Android跨程序共享数据，探究内容提供器(进阶篇)上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。其实把我们程序的数据提供给其他应用程序使用有好多方式，比如我们把数据写到">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/liujiakuoyx.github.io/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://github.com/2017/03/16/Android跨程序共享数据，探究内容提供器-进阶篇/"/>
+
+
+
+
+
+  <title> Android跨程序共享数据，探究内容提供器(进阶篇) | 我的学习笔记 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/liujiakuoyx.github.io/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">我的学习笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/liujiakuoyx.github.io/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/liujiakuoyx.github.io/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/liujiakuoyx.github.io/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/03/16/Android跨程序共享数据，探究内容提供器-进阶篇/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="LiuJiaKuo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的学习笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android跨程序共享数据，探究内容提供器(进阶篇)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-16T20:14:13+08:00">
+                2017-03-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Android跨程序共享数据，探究内容提供器-进阶篇"><a href="#Android跨程序共享数据，探究内容提供器-进阶篇" class="headerlink" title="Android跨程序共享数据，探究内容提供器(进阶篇)"></a>Android跨程序共享数据，探究内容提供器(进阶篇)</h1><p>上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。<br>其实把我们程序的数据提供给其他应用程序使用有好多方式，比如我们把数据写到一个文件里面，让其他程序读取我们的文件。但是这样并不能很好地保证数据安全性和永久性。官方推荐我们的方式就是使用提供器，可以新建一个类去继承ContentProvider的方式创建一个自己的内容提供器。ContentProvider类中有六个抽象方法。我们在使用子类继承他的时候，需要将这六个方法重写，接下来我们新建我们的MyProvider继承自ContentProvider，代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">public class MyProvider extends ContentProvider&#123;</div><div class="line">    @Override</div><div class="line">    public boolean onCreate() &#123;</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public String getType(@NonNull Uri uri) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) &#123;</div><div class="line">        return 0;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) &#123;</div><div class="line">        return 0;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>简单介绍一下这几个方法：</p>
+<ol>
+<li>onCreate()<br> 初始化内容提供器的时候调用，通常会在这里完成对数据库的创建和升级操作，返回 true 表示内容提供器初试化成功，返回 false则表示失败。注意，只有当存在ContentResolver尝试访问我们的程序中的数据时，内容提供器才会被初始化。</li>
+<li>query()<br> 从内容提供器中查询数据。使用 uri 参数来确定查询那张表，projection参数用于确定查询哪些列，selection 和 selectionArgs参数用于约束查询哪些行，sortOrder 参数用于对结果经行排序，查询的结果存放在 Cursor 对象中返回。</li>
+<li>insert()<br> 向内容提供器中添加一条数据。使用 uri 参数确定要添加到的表，待添加的数据保存在 values 中。添加完成后，返回一个用于表示该条新记录的URI。</li>
+<li>update()<br> 更新内容提供器中已有的数据。使用 uri 参数确定要更新哪一张表里面的数据，新数据保存在values参数中，selection 和 selectionArgs 参数用于约束更新哪些行，受影响的行数据将作为返回值返回。</li>
+<li>delete()<br> 从内容提供器中删除数据。使用 uri 参数确定删除哪张表的数据，selection 和 selectionArgs 参数用来约束删除哪些行，被删除的行数将作为返回值返回。</li>
+<li>getType()<br> 根据出入的内容 uri 来返回相应的 MIME 类型。</li>
+</ol>
+<p>我们再来回顾一下前面关于内容 Uri 的知识。<br>我们上一章提到，一个标准的内容 Uri 写成是这样的：</p>
+<pre><code>content://com.example.app.provider/table1
+</code></pre><p>这就表示了我们想要访问的是 com.example.app 这个应用下的 table1 这张表。除此之外我们还可以在最后面加上一个id。如下：</p>
+<pre><code>content://com.example.app.provider/table1/1
+</code></pre><p>这就表示了我们想要访问的是 com.example.app 这个应用下的 table1 这张表中 id 为 1 的数据。<br>内容Uri就这两种类型，一种是一路径结尾的，表明的是要访问表里面所有的数据；另一种就是以id结尾的，表明的是要访问相应id的数据。我们可以用通配符的方式来分别表示这两种类型，规则如下：</p>
+<pre><code>1. *：表示匹配任意长度的任意字符
+2. #：表示匹配任意长度的数字
+</code></pre><p>所以一个能够匹配任意表的内容uri就可以写成：</p>
+<pre><code>content://com.example.app.provider/*
+</code></pre><p>一个能够匹配table1表中的所有数据的内容uri就可以写成：</p>
+<pre><code>content://com.example.app.provider/table1/#
+</code></pre><p>在这里我们可以借助 UriMatcher 类来轻松的实现匹配内容Uri的功能。 UriMatcher 中提供了一个 addURI() 方法，这个方法接受三个参数，分别是我们能容Uri的权限、路径和一个Code(int)。当我们调用 UriMatcher 的 match() 方法时，就可以传入一个Uri，返回值则是对应这个Uri所对应匹配的 Code。利用这个Code我们就能够判断调用方期望的是哪张表中的数据了。具体操作如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">public class MyProvider extends ContentProvider &#123;</div><div class="line">    private SQLiteDatabase db;</div><div class="line">    private static UriMatcher uriMatcher;</div><div class="line">    private static final int TABLE_DIR = 0;//表明要访问table1中的所有数据</div><div class="line">    private static final int TABLE_ITEM = 1;//表明要访问table1中的某行数据</div><div class="line"></div><div class="line">    static &#123;</div><div class="line">        uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);</div><div class="line">        uriMatcher.addURI(&quot;com.example.app.provider&quot;, &quot;table1&quot;, TABLE_DIR);</div><div class="line">        uriMatcher.addURI(&quot;com.example.app.provider&quot;, &quot;table1/#&quot;, TABLE_ITEM);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onCreate() &#123;</div><div class="line">        db = SQLiteDatabase.openOrCreateDatabase(flie, factory);</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) &#123;</div><div class="line">        Cursor cursor = null;</div><div class="line">        switch (uriMatcher.match(uri)) &#123;</div><div class="line">            case TABLE_DIR:</div><div class="line">                cursor = db.query(&quot;table1&quot;,projection,selection,selectionArgs,null,null,sortOrder);</div><div class="line">                //。。。访问table1中的所有数据相应的操作</div><div class="line">                break;</div><div class="line">            case TABLE_ITEM:</div><div class="line">                String Id = uri.getPathSegments().get(1);</div><div class="line">                cursor = db.query(&quot;table1&quot;,projection,&quot;id=?&quot;,new String[]&#123;Id&#125;,null,null,sortOrder);</div><div class="line">                //。。。访问table1中某行数据相应的操作</div><div class="line">                break;</div><div class="line">        &#125;</div><div class="line">        return cursor;</div><div class="line">    &#125;</div><div class="line">    ........</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们可以看到我们利用UriMatcher来判断调用者的访问意图，并按意图用switch分开处理。在这里数据库的操作就不再多加解释，相信大家应该已经能够灵活掌握。重点来说一下 uri.getPathSegments().get(1) 的用法。</p>
+<blockquote>
+<p>uri.getPathSegments().get(int)这个方法用来获取uri中的路径部分，并以’/‘为分隔符来给路径从零标号。比如 content://com.example.app.provider/table1/1 这个uri，我们使用uri.getPathSegments().get(0)返回的结果则是”table1”,同理uri.getPathSegments().get(1)返回的是”1”。</p>
+</blockquote>
+<p>其实其他增、删、改操作跟查询是一样的道理，就不再堆多余代码了。除此之外还有一个比较陌生的getType()方法。<br>它是所有内容提供器都必须提供的一个方法，用于获取Uri对象所对应的MIME类型。MIME字符串主要有三部分组成，Android对这三部分做了如下格式规定。</p>
+<pre><code>1. 必须以 vnd 开头。
+2. 如果Uri以路径为结尾，则后接 android.cursor.dir/,如果Uri以id为结尾，则后接 android.cursor.item/.
+3. 最后接上 vnd.&lt;anthority&gt;.&lt;path&gt;.
+</code></pre><p>所以对于 content://com.example.app.provider/table1 这个内容 Uri，它所对应的MIME类型就可以写成：</p>
+<pre><code>vnd.android.coursor.dir/vnd.com.example.app.provider.table1
+</code></pre><p>相应的 content://com.example.app.provider/table1/1 就可以写成：</p>
+<pre><code>vnd.android.coursor.item/vnd.com.example.app.provider.table1
+</code></pre><p>修改getType()方法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">    public String getType(@NonNull Uri uri) &#123;</div><div class="line">        switch (uriMatcher.match(uri)) &#123;</div><div class="line">            case TABLE_DIR:</div><div class="line">                return &quot;vnd.android.coursor.dir/vnd.com.example.app.provider.table1&quot;;</div><div class="line">                break;</div><div class="line">            case TABLE_ITEM:</div><div class="line">                return &quot;vnd.android.coursor.item/vnd.com.example.app.provider.table1&quot;;</div><div class="line">                break;</div><div class="line">        &#125;</div><div class="line">        return null;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>我们把其他方法补充完整后我们的内容提供器就写好了，但是现在其他应用程序还不能调用。我们要在 AndroidManifest.xml 的<appliction> 标签中添加如下代码：</appliction></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;provider</div><div class="line">       android:name=&quot;com.example.app.MyProvider&quot;</div><div class="line">       android:authorities=&quot;com.example.app.provider&quot;</div><div class="line">       android:exported=&quot;true&quot;/&gt;</div></pre></td></tr></table></figure>
+<p>android:name属性中制定了类的全名，android:authorities指定了该内容提供器的权限（为了避免与其他应用冲突，尽量以 包名.provider 来命名）。android:exported属性制定了内容提供器是可以被其他应用访问的。</p>
+<p>到现在我们的内容提供器就编写完成了，我们可以通过权限为 com.example.app.provider 的内容Uri 来访问我们的内容提供器，至于要访问的表自己可以通过数据库的知识建立一个数据库来存放数据。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/liujiakuoyx.github.io/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/liujiakuoyx.github.io/2017/03/15/Android跨程序共享数据，探究内容提供器/" rel="next" title="Android跨程序共享数据，探究内容提供器">
+                <i class="fa fa-chevron-left"></i> Android跨程序共享数据，探究内容提供器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg"
+               alt="LiuJiaKuo" />
+          <p class="site-author-name" itemprop="name">LiuJiaKuo</p>
+           
+              <p class="site-description motion-element" itemprop="description">学习总结 思考感悟 知识管理</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/liujiakuoyx.github.io/archives">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/liujiakuoyx.github.io/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Android跨程序共享数据，探究内容提供器-进阶篇"><span class="nav-number">1.</span> <span class="nav-text">Android跨程序共享数据，探究内容提供器(进阶篇)</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LiuJiaKuo</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/liujiakuoyx.github.io/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/liujiakuoyx.github.io/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/liujiakuoyx.github.io/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/liujiakuoyx.github.io/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>
