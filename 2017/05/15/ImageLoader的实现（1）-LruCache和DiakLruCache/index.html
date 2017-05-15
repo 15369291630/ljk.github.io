@@ -1,0 +1,707 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/liujiakuoyx.github.io/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/liujiakuoyx.github.io/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/liujiakuoyx.github.io/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/liujiakuoyx.github.io/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="ImageLoader的实现（1）-LruCache和DiakLruCache
+参考文献《Android开发艺术探索》
+
+LRU(Least Recently Used)，LRU是近期最少使用算法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ImageLoader的实现（1） LruCache和DiakLruCache">
+<meta property="og:url" content="http://github.com/2017/05/15/ImageLoader的实现（1）-LruCache和DiakLruCache/index.html">
+<meta property="og:site_name" content="我的学习笔记">
+<meta property="og:description" content="ImageLoader的实现（1）-LruCache和DiakLruCache
+参考文献《Android开发艺术探索》
+
+LRU(Least Recently Used)，LRU是近期最少使用算法">
+<meta property="og:updated_time" content="2017-05-15T14:51:56.699Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ImageLoader的实现（1） LruCache和DiakLruCache">
+<meta name="twitter:description" content="ImageLoader的实现（1）-LruCache和DiakLruCache
+参考文献《Android开发艺术探索》
+
+LRU(Least Recently Used)，LRU是近期最少使用算法">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/liujiakuoyx.github.io/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://github.com/2017/05/15/ImageLoader的实现（1）-LruCache和DiakLruCache/"/>
+
+
+
+
+
+  <title> ImageLoader的实现（1） LruCache和DiakLruCache | 我的学习笔记 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/liujiakuoyx.github.io/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">我的学习笔记</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/liujiakuoyx.github.io/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/liujiakuoyx.github.io/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/liujiakuoyx.github.io/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/05/15/ImageLoader的实现（1）-LruCache和DiakLruCache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="LiuJiaKuo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的学习笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                ImageLoader的实现（1） LruCache和DiakLruCache
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-15T20:07:46+08:00">
+                2017-05-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="ImageLoader的实现（1）-LruCache和DiakLruCache"><a href="#ImageLoader的实现（1）-LruCache和DiakLruCache" class="headerlink" title="ImageLoader的实现（1）-LruCache和DiakLruCache"></a>ImageLoader的实现（1）-LruCache和DiakLruCache</h1><blockquote>
+<p>参考文献《Android开发艺术探索》</p>
+</blockquote>
+<p>LRU(Least Recently Used)，LRU是近期最少使用算法<a id="more"></a>，它的核心思想是当缓存满时，优先淘汰近期最少使用的缓存对象，采用LRU算法的缓存有两种，分别是：LruCache和DiskLruCache。DiskLruCache充当了储存设备缓存，通过这两个结合可以实现具有很高实用性的ImageLoader。</p>
+<h3 id="1-LruCache"><a href="#1-LruCache" class="headerlink" title="1 LruCache"></a>1 LruCache</h3><h4 id="1-1-LruCache简介"><a href="#1-1-LruCache简介" class="headerlink" title="1.1 LruCache简介"></a>1.1 LruCache简介</h4><p>LruCache是一个泛型类，它内部采用一个LinkedHashMap以强引用的形式储存外界的缓存对象，其提供了get和put方法来完成缓存的获取与添加操作，当缓存满时，LruCache会移除近期最少使用的缓存对象，然后再添加新的缓存对象。这简单说一下强引用的概念。</p>
+<ul>
+<li>强引用：直接的引用对象；</li>
+<li>软引用：当一个对象只有软引用存在时，系统内存不足时会被GC回收；</li>
+<li>弱引用：当一个对象只有弱引用存在时，此对象随时会被GC回收。</li>
+</ul>
+<h4 id="1-2-LruCache的使用"><a href="#1-2-LruCache的使用" class="headerlink" title="1.2 LruCache的使用"></a>1.2 LruCache的使用</h4><p>典型初始化过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">int maxMemory = (int)(Runtime.getRuntime().maxMemory()/1024);</div><div class="line">int cacheSize = maxMemory/8;</div><div class="line">mMemoryCache = new LruCache&lt;String,Bitmap&gt;(cacheSize)&#123;</div><div class="line">true@override</div><div class="line">trueprotected int sizeOf(String key, Bitmap bitmap)&#123;</div><div class="line">        return bitmap.getRowBytes()*bitmap.getHeight()/1024;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在上面代码中只需要提供缓存的总容量大小并重写sizeOf方法即可，sizeOf方法的作用是计算缓存对象的大小，这里大小的单位需要跟纵容脸的单位一致。对以上示例代码来说总容量大小为当前进程可用内存的1/8，单位为kb，而sizeOf方法则完成了Bitmap对象大小的计算，分明显，之所以除以1024也是为了将其单位转换为kb。一些情况下，还需要重写LruCache的entryRemoved方法，当LruCache移除旧缓存对象的时候会调用entryRemoved方法，因此可以在entryRemoved方法中完成一些资源的回收。<br>缓存的添加与获取就很简单。<br>从LruCache中添加一个缓存度对象:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mMemoryCache.put(key,bitmap)</div></pre></td></tr></table></figure>
+<p>从LruCache中获取一个缓存度对象:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mMemoryCache.get(key)</div></pre></td></tr></table></figure>
+<p>LruCache还支持删除功能，通多remove方法可以删除一个指定的缓存对象。LruCache的操作很简单，但是功能很强大，LruCache已经成为Android源码的一部分了。</p>
+<h4 id="1-3-1-DiskLruCache的使用"><a href="#1-3-1-DiskLruCache的使用" class="headerlink" title="1.3.1 DiskLruCache的使用"></a>1.3.1 DiskLruCache的使用</h4><p>DiskLruCache用于实现储存设备的缓存，即磁盘缓存，他通过将缓存对象写入文件系统实现缓存的效果，DiskLruCache得到了Android官方文档的推荐，但他不属于Android ADK的一部分，特的源码可以从下面网址获得：</p>
+<blockquote>
+<p><a href="https://android.googlesource.com/platform/libcore/+/jb-mr2-release/luni/src/main/java/libcore/io/DiskLruCache.java" target="_blank" rel="external">https://android.googlesource.com/platform/libcore/+/jb-mr2-release/luni/src/main/java/libcore/io/DiskLruCache.java</a></p>
+</blockquote>
+<p>还需要注意的是从网站上获取的DiskLruCache不能直接使用，还需要改一下编译错误。</p>
+<h5 id="1-3-2-DiskLruCache的创建"><a href="#1-3-2-DiskLruCache的创建" class="headerlink" title="1.3.2 DiskLruCache的创建"></a>1.3.2 DiskLruCache的创建</h5><p>DiskLruCache并不需要利用他的构造方法来创建，DiskLruCache提供了open方法用来创建自身对象，如下所示</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">public static DiskLruCache open(File directory, int appVersion, int valueCount, long maxSize)</div></pre></td></tr></table></figure>
+<p>open方法有四个参数，其中第一个参数表示磁盘缓存在文件系统中的储存路径。缓存路径可以选择SD卡上的缓存目录，具体是指/sdcard/Android/data/package_name/cache目录，其中package _name为当前应用包名,当应用卸载后，此目录会一并删除。当然也可以选择其他目录作为缓存的储存地址。<br>第二个参数表示应用的版本号，一般设为1即可。指的是档版本号变化时DiskLruCache会清空之前的缓存文件。<br>第三个参数表示单个节点对应的数据个数，一般设为1即可。第四个参数表示的是总缓存的大小，比如50MB，当缓存大超出这个设定范围值后DiskLruCache会清除一些缓存从而保证大小不大于这个设定值。</p>
+<p>创建过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">private static final long DISK_CACHE_SIZE = 1024*1024*50;//50MB</div><div class="line"></div><div class="line">File diskCacheDir = getDiskCacheDir(mContext,&quot;bitmap&quot;);</div><div class="line">if(!diskCacheDir.exists())&#123;</div><div class="line">    diskCacheDir.mkdirs();</div><div class="line">&#125;</div><div class="line">mDisLruCache = DiskLruCache.open(diskCacheDir,1,1,DISK_CACHE_SIZE);</div></pre></td></tr></table></figure>
+<h4 id="1-3-3-DiskLruCache的缓存添加"><a href="#1-3-3-DiskLruCache的缓存添加" class="headerlink" title="1.3.3 DiskLruCache的缓存添加"></a>1.3.3 DiskLruCache的缓存添加</h4><p>DiskLruCache 的缓存添加操作是通过Editor完成的，Editor缓存对象的编辑对象。这里仍然以图片缓存举例子，首先需要获取图片的url所对应的key，然后根据key就可以通过edit()来获取Eeitor对象，如果这个对象正在被编辑，那么edit()会返回null，即DiskLruCache不允许同时编辑一个缓存对象。之所以把url转换为key是因为图片的url中很可能有特殊字符，这将会影响url在Android中直接使用，一般使用url的md5值作为key，如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">private String hashKeyFormUrl(String url)&#123;</div><div class="line">trueString cacheKey;</div><div class="line">truetry&#123;</div><div class="line">        final MessageDigest mDuigest = MessageDigest.getInstance(&quot;MD5&quot;);</div><div class="line">        mDuigest.update(url.getByte());</div><div class="line">        cacheKey = byteToHexString(mDuigest.digest());</div><div class="line">    &#125;catch (NoSuchAlogorithmException e)&#123;</div><div class="line">        cacheKey = String.valueOf(url.hashCode());</div><div class="line">    &#125;</div><div class="line">    return cacheKey;</div><div class="line">&#125;</div><div class="line">    private String byteToHexString(byte[] bytes)&#123;</div><div class="line">    StringBuilder sb = new StringBuilder();</div><div class="line">    for(int i = 0;i &lt; bytes.length;i++)&#123;</div><div class="line">    String hex = Integer.toHexString(0XFF &amp; bytes[i]);</div><div class="line">    if(hex.length() == 1)&#123;</div><div class="line">        sb.append(&apos;0&apos;);</div><div class="line">        &#125;</div><div class="line">        sb.append(hex);</div><div class="line">    &#125;</div><div class="line">    return bs.toString();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>将图片url转化为key之后，就可以获取Editor对象了，对于这个key来说，如果当前不存在其他Editor对象，那么edit()就会返回一个新的Editor对象，通过他就可以得到一个文件的输出流。需要注意的是，由于前面在DiskLruCache的open方法中设置了一个节点值能有一个数据，因此在下面的DISK_CACHE_INDEX常量直接设为0即可，如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String key = hashKeyFormUrl(url);</div><div class="line">DiskLruCache.Editor editor = mDiskLruCache.edit();</div><div class="line">if(editor!=null)&#123;</div><div class="line">trueOutputStream outputStream = editor.newOutputStream(DISK_CACHE_INDEX);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>有了文件输出流，当从网上下载图片的时候，图片就可以通过和这个文件输出流写入到文件系统上，这个过程的实现如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">private boolean downloadUrlToStream(String urlString, OutputStream outputStream) &#123;</div><div class="line">    HttpURLConnection urlConnection = null;</div><div class="line">    BufferedOutputStream out = null;</div><div class="line">    BufferedInputStream in = null;</div><div class="line">    try &#123;</div><div class="line">        final URL url = new URL(urlString);</div><div class="line">        urlConnection = (HttpURLConnection) url.openConnection();</div><div class="line">        in = new BufferedInputStream(urlConnection.getInputStream(), 8 * 1024);</div><div class="line">        out = new BufferedOutputStream(outputStream, 8 * 1024);</div><div class="line">        int b;</div><div class="line">        while ((b = in.read()) != -1) &#123;</div><div class="line">            out.write(b);</div><div class="line">        &#125;</div><div class="line">        return true;</div><div class="line">    &#125; catch (final IOException e) &#123;</div><div class="line">        e.printStackTrace();</div><div class="line">    &#125; finally &#123;</div><div class="line">        if (urlConnection != null) &#123;</div><div class="line">            urlConnection.disconnect();</div><div class="line">        &#125;</div><div class="line">        try &#123;</div><div class="line">            if (out != null) &#123;</div><div class="line">                out.close();</div><div class="line">            &#125;</div><div class="line">            if (in != null) &#123;</div><div class="line">                in.close();</div><div class="line">            &#125;</div><div class="line">        &#125; catch (final IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return false;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>进过上面的步骤，其实并没有真正的将图片写入文件系统，还必须通过Editor的commit()来提交写入操作，如果图片下载时候异常，还可以通过Editor的abort()来退回整个操作。最后通过DiskLruCache的flush()方法推出缓存。</p>
+<h4 id="1-3-3-DiskLruCache的缓存查找"><a href="#1-3-3-DiskLruCache的缓存查找" class="headerlink" title="1.3.3 DiskLruCache的缓存查找"></a>1.3.3 DiskLruCache的缓存查找</h4><p>和缓存添加过程一样，把url转换为key，然后通过DiskLruCache的get方法得到一个Snapshot对象，接着通过Snapshot对象即可获得缓存文件的输入流，自然就可以从输入流中获得bitmap对象了。因为比较简单，具体的读者可以自己去实现。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/liujiakuoyx.github.io/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/liujiakuoyx.github.io/2017/04/05/打造优美列表布局——进阶篇/" rel="next" title="打造优美列表布局——进阶篇">
+                <i class="fa fa-chevron-left"></i> 打造优美列表布局——进阶篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+          
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg"
+               alt="LiuJiaKuo" />
+          <p class="site-author-name" itemprop="name">LiuJiaKuo</p>
+           
+              <p class="site-description motion-element" itemprop="description">学习总结 思考感悟 知识管理</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/liujiakuoyx.github.io/archives">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/liujiakuoyx.github.io/tags/index.html">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ImageLoader的实现（1）-LruCache和DiakLruCache"><span class="nav-number">1.</span> <span class="nav-text">ImageLoader的实现（1）-LruCache和DiakLruCache</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-LruCache"><span class="nav-number">1.0.1.</span> <span class="nav-text">1 LruCache</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-LruCache简介"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">1.1 LruCache简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-LruCache的使用"><span class="nav-number">1.0.1.2.</span> <span class="nav-text">1.2 LruCache的使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-1-DiskLruCache的使用"><span class="nav-number">1.0.1.3.</span> <span class="nav-text">1.3.1 DiskLruCache的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-3-2-DiskLruCache的创建"><span class="nav-number">1.0.1.3.1.</span> <span class="nav-text">1.3.2 DiskLruCache的创建</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-3-DiskLruCache的缓存添加"><span class="nav-number">1.0.1.4.</span> <span class="nav-text">1.3.3 DiskLruCache的缓存添加</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-3-DiskLruCache的缓存查找"><span class="nav-number">1.0.1.5.</span> <span class="nav-text">1.3.3 DiskLruCache的缓存查找</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">LiuJiaKuo</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/liujiakuoyx.github.io/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/liujiakuoyx.github.io/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/liujiakuoyx.github.io/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/liujiakuoyx.github.io/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/liujiakuoyx.github.io/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+</body>
+</html>

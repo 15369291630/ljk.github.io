@@ -87,16 +87,16 @@
 
 
 
-<meta name="description" content="Android跨程序共享数据，探究内容提供器(进阶篇)上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。其实把我们程序的数据提供给其他应用程序使用有好多方式，比如我们把数据写到">
+<meta name="description" content="Android跨程序共享数据，探究内容提供器(进阶篇)上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android跨程序共享数据，探究内容提供器(进阶篇)">
 <meta property="og:url" content="http://github.com/2017/03/16/Android跨程序共享数据，探究内容提供器-进阶篇/index.html">
 <meta property="og:site_name" content="我的学习笔记">
-<meta property="og:description" content="Android跨程序共享数据，探究内容提供器(进阶篇)上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。其实把我们程序的数据提供给其他应用程序使用有好多方式，比如我们把数据写到">
-<meta property="og:updated_time" content="2017-03-16T14:30:59.123Z">
+<meta property="og:description" content="Android跨程序共享数据，探究内容提供器(进阶篇)上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。">
+<meta property="og:updated_time" content="2017-05-15T11:52:16.883Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android跨程序共享数据，探究内容提供器(进阶篇)">
-<meta name="twitter:description" content="Android跨程序共享数据，探究内容提供器(进阶篇)上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。其实把我们程序的数据提供给其他应用程序使用有好多方式，比如我们把数据写到">
+<meta name="twitter:description" content="Android跨程序共享数据，探究内容提供器(进阶篇)上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。">
 
 
 
@@ -321,7 +321,7 @@
       
 
       
-        <h1 id="Android跨程序共享数据，探究内容提供器-进阶篇"><a href="#Android跨程序共享数据，探究内容提供器-进阶篇" class="headerlink" title="Android跨程序共享数据，探究内容提供器(进阶篇)"></a>Android跨程序共享数据，探究内容提供器(进阶篇)</h1><p>上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。<br>其实把我们程序的数据提供给其他应用程序使用有好多方式，比如我们把数据写到一个文件里面，让其他程序读取我们的文件。但是这样并不能很好地保证数据安全性和永久性。官方推荐我们的方式就是使用提供器，可以新建一个类去继承ContentProvider的方式创建一个自己的内容提供器。ContentProvider类中有六个抽象方法。我们在使用子类继承他的时候，需要将这六个方法重写，接下来我们新建我们的MyProvider继承自ContentProvider，代码如下：</p>
+        <h1 id="Android跨程序共享数据，探究内容提供器-进阶篇"><a href="#Android跨程序共享数据，探究内容提供器-进阶篇" class="headerlink" title="Android跨程序共享数据，探究内容提供器(进阶篇)"></a>Android跨程序共享数据，探究内容提供器(进阶篇)</h1><p>上一章讲到怎么使用ContentResolver访问系统提供的数据接口读取联系人信息，那么系统程序是怎样对外建立并开放这些数据接口的呢？好多时候我们自己应用程序也需要数据共享的功能，以便于其他程序访问我们的数据，那么我们该怎么实现我们自己的数据接口，接下来让我们来一起学习。<a id="more"></a><br>其实把我们程序的数据提供给其他应用程序使用有好多方式，比如我们把数据写到一个文件里面，让其他程序读取我们的文件。但是这样并不能很好地保证数据安全性和永久性。官方推荐我们的方式就是使用提供器，可以新建一个类去继承ContentProvider的方式创建一个自己的内容提供器。ContentProvider类中有六个抽象方法。我们在使用子类继承他的时候，需要将这六个方法重写，接下来我们新建我们的MyProvider继承自ContentProvider，代码如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">public class MyProvider extends ContentProvider&#123;</div><div class="line">    @Override</div><div class="line">    public boolean onCreate() &#123;</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public String getType(@NonNull Uri uri) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Nullable</div><div class="line">    @Override</div><div class="line">    public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) &#123;</div><div class="line">        return 0;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int update(@NonNull Uri uri, @Nullable ContentValues values, @Nullable String selection, @Nullable String[] selectionArgs) &#123;</div><div class="line">        return 0;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>简单介绍一下这几个方法：</p>
 <ol>
@@ -489,7 +489,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/liujiakuoyx.github.io/archives">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

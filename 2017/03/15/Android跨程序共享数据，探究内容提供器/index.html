@@ -90,7 +90,7 @@
 <meta name="description" content="Android跨程序共享数据，探究内容提供器
 《Android第一行代码》
 
-内容提供器简介内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。不同文件储存和SharedPreferences储存中">
+内容提供器简介内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android跨程序共享数据，探究内容提供器">
 <meta property="og:url" content="http://github.com/2017/03/15/Android跨程序共享数据，探究内容提供器/index.html">
@@ -98,14 +98,14 @@
 <meta property="og:description" content="Android跨程序共享数据，探究内容提供器
 《Android第一行代码》
 
-内容提供器简介内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。不同文件储存和SharedPreferences储存中">
-<meta property="og:updated_time" content="2017-03-16T11:41:07.813Z">
+内容提供器简介内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。">
+<meta property="og:updated_time" content="2017-05-15T12:02:06.459Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android跨程序共享数据，探究内容提供器">
 <meta name="twitter:description" content="Android跨程序共享数据，探究内容提供器
 《Android第一行代码》
 
-内容提供器简介内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。不同文件储存和SharedPreferences储存中">
+内容提供器简介内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。">
 
 
 
@@ -333,7 +333,7 @@
         <h1 id="Android跨程序共享数据，探究内容提供器"><a href="#Android跨程序共享数据，探究内容提供器" class="headerlink" title="Android跨程序共享数据，探究内容提供器"></a>Android跨程序共享数据，探究内容提供器</h1><blockquote>
 <p>《Android第一行代码》</p>
 </blockquote>
-<h2 id="内容提供器简介"><a href="#内容提供器简介" class="headerlink" title="内容提供器简介"></a>内容提供器简介</h2><p>内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。<br>不同文件储存和SharedPreferences储存中的两种全局可读写操作模式，内容提供器可以选择只对哪一部分数据进行共享，从而保证我们数据的安全性。<br>内容提供器主要有两种操作，一种是利用现有的内容提供器来读取和操作相应程序的数据，另一种是创建自己的内容提供器提供给其他程序使用。接下来我让我们学习这两种操作,本次我们先学习利用现有的内容提供器来读取和操作相应程序的数据的相应操作。</p>
+<h2 id="内容提供器简介"><a href="#内容提供器简介" class="headerlink" title="内容提供器简介"></a>内容提供器简介</h2><p>内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。<a id="more"></a><br>不同文件储存和SharedPreferences储存中的两种全局可读写操作模式，内容提供器可以选择只对哪一部分数据进行共享，从而保证我们数据的安全性。<br>内容提供器主要有两种操作，一种是利用现有的内容提供器来读取和操作相应程序的数据，另一种是创建自己的内容提供器提供给其他程序使用。接下来我让我们学习这两种操作,本次我们先学习利用现有的内容提供器来读取和操作相应程序的数据的相应操作。</p>
 <h2 id="访问其他程序中的数据"><a href="#访问其他程序中的数据" class="headerlink" title="访问其他程序中的数据"></a>访问其他程序中的数据</h2><p>当一个程序通过内容提供器对其数据提供了外部访问接口，任何其他程序就都可以对这部分数据进行访问。Android系统自带的电话簿、短信、媒体播放器等程序都提供了类似的访问接口，这就使得第三方程序可以允许充分利用这部分的数据来实现更好的功能。接下来我们就来看看怎么使用这部分数据。</p>
 <h3 id="ContentResolver-的基本用法"><a href="#ContentResolver-的基本用法" class="headerlink" title="ContentResolver 的基本用法"></a>ContentResolver 的基本用法</h3><p>要使用其他程序提供的数据，就需要借助ContentResolver类，可以通过Context中的getContentResolver()方法获取到该类实例。ContentResolver中提供了一系列方法用于对数据的CRUD（增删改查）操作，其中insert()方法用于添加数据，update()方法用于更新数据，delete()方法用于删除数据，query()方法用于查询数据。这种操作类似于SQLiteDataBase的操作，但不同于SQLiteDataBase的是，ContentResolver中的增删改查操作不接收表明参数，而是接收一个Uri参数。这个参数被称为内容ERI。内容URI给内容提供器中的数据建立了唯一的标识，他主要是由两部分组成，权限（authority）和路径（path）。权限适用于对不同的应用程序作区分的，一般为了避免冲突，都会采用程序包名方式来进行命名。比如摸个程序的包名是com.example.app，那么该程序对应的权限就可以命名为 com.example.app.provider。路径则是用于对同一个应用程序中不同的表作区分的。比如你的应用程序有两张表table1、table2，那么内容URI就可以写成com.example.app.provider/table1和com.example.app.provider/table2。不过这样还不算是完整的内容URI，还需要加上我们的协议声明：</p>
 <blockquote>
@@ -505,7 +505,7 @@ sortOrder       指定查询的排列方式
           
             <div class="site-state-item site-state-posts">
               <a href="/liujiakuoyx.github.io/archives">
-                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-count">7</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
