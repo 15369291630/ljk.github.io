@@ -99,7 +99,7 @@ LRU(Least Recently Used)，LRU是近期最少使用算法">
 参考文献《Android开发艺术探索》
 
 LRU(Least Recently Used)，LRU是近期最少使用算法">
-<meta property="og:updated_time" content="2017-05-15T14:51:56.699Z">
+<meta property="og:updated_time" content="2017-05-16T08:54:16.110Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ImageLoader的实现（1） LruCache和DiakLruCache">
 <meta name="twitter:description" content="ImageLoader的实现（1）-LruCache和DiakLruCache
@@ -358,7 +358,7 @@ LRU(Least Recently Used)，LRU是近期最少使用算法">
 <p>创建过程：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">private static final long DISK_CACHE_SIZE = 1024*1024*50;//50MB</div><div class="line"></div><div class="line">File diskCacheDir = getDiskCacheDir(mContext,&quot;bitmap&quot;);</div><div class="line">if(!diskCacheDir.exists())&#123;</div><div class="line">    diskCacheDir.mkdirs();</div><div class="line">&#125;</div><div class="line">mDisLruCache = DiskLruCache.open(diskCacheDir,1,1,DISK_CACHE_SIZE);</div></pre></td></tr></table></figure>
 <h4 id="1-3-3-DiskLruCache的缓存添加"><a href="#1-3-3-DiskLruCache的缓存添加" class="headerlink" title="1.3.3 DiskLruCache的缓存添加"></a>1.3.3 DiskLruCache的缓存添加</h4><p>DiskLruCache 的缓存添加操作是通过Editor完成的，Editor缓存对象的编辑对象。这里仍然以图片缓存举例子，首先需要获取图片的url所对应的key，然后根据key就可以通过edit()来获取Eeitor对象，如果这个对象正在被编辑，那么edit()会返回null，即DiskLruCache不允许同时编辑一个缓存对象。之所以把url转换为key是因为图片的url中很可能有特殊字符，这将会影响url在Android中直接使用，一般使用url的md5值作为key，如下。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">private String hashKeyFormUrl(String url)&#123;</div><div class="line">trueString cacheKey;</div><div class="line">truetry&#123;</div><div class="line">        final MessageDigest mDuigest = MessageDigest.getInstance(&quot;MD5&quot;);</div><div class="line">        mDuigest.update(url.getByte());</div><div class="line">        cacheKey = byteToHexString(mDuigest.digest());</div><div class="line">    &#125;catch (NoSuchAlogorithmException e)&#123;</div><div class="line">        cacheKey = String.valueOf(url.hashCode());</div><div class="line">    &#125;</div><div class="line">    return cacheKey;</div><div class="line">&#125;</div><div class="line">    private String byteToHexString(byte[] bytes)&#123;</div><div class="line">    StringBuilder sb = new StringBuilder();</div><div class="line">    for(int i = 0;i &lt; bytes.length;i++)&#123;</div><div class="line">    String hex = Integer.toHexString(0XFF &amp; bytes[i]);</div><div class="line">    if(hex.length() == 1)&#123;</div><div class="line">        sb.append(&apos;0&apos;);</div><div class="line">        &#125;</div><div class="line">        sb.append(hex);</div><div class="line">    &#125;</div><div class="line">    return bs.toString();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">private String hashKeyFormUrl(String url)&#123;</div><div class="line">trueString cacheKey;</div><div class="line">truetry&#123;</div><div class="line">        final MessageDigest mDuigest = MessageDigest.getInstance(&quot;MD5&quot;);</div><div class="line">        mDuigest.update(url.getBytes());</div><div class="line">        cacheKey = byteToHexString(mDuigest.digest());</div><div class="line">    &#125;catch (NoSuchAlogorithmException e)&#123;</div><div class="line">        cacheKey = String.valueOf(url.hashCode());</div><div class="line">    &#125;</div><div class="line">    return cacheKey;</div><div class="line">&#125;</div><div class="line">    private String byteToHexString(byte[] bytes)&#123;</div><div class="line">    StringBuilder sb = new StringBuilder();</div><div class="line">    for(int i = 0;i &lt; bytes.length;i++)&#123;</div><div class="line">    String hex = Integer.toHexString(0XFF &amp; bytes[i]);</div><div class="line">    if(hex.length() == 1)&#123;</div><div class="line">        sb.append(&apos;0&apos;);</div><div class="line">        &#125;</div><div class="line">        sb.append(hex);</div><div class="line">    &#125;</div><div class="line">    return sb.toString();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>将图片url转化为key之后，就可以获取Editor对象了，对于这个key来说，如果当前不存在其他Editor对象，那么edit()就会返回一个新的Editor对象，通过他就可以得到一个文件的输出流。需要注意的是，由于前面在DiskLruCache的open方法中设置了一个节点值能有一个数据，因此在下面的DISK_CACHE_INDEX常量直接设为0即可，如下。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String key = hashKeyFormUrl(url);</div><div class="line">DiskLruCache.Editor editor = mDiskLruCache.edit();</div><div class="line">if(editor!=null)&#123;</div><div class="line">trueOutputStream outputStream = editor.newOutputStream(DISK_CACHE_INDEX);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>有了文件输出流，当从网上下载图片的时候，图片就可以通过和这个文件输出流写入到文件系统上，这个过程的实现如下。</p>
@@ -416,6 +416,10 @@ LRU(Least Recently Used)，LRU是近期最少使用算法">
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/liujiakuoyx.github.io/2017/05/16/ImageLoader的实现（2）-ImageLoader的具体实现/" rel="prev" title="ImageLoader的实现（2）-ImageLoader的具体实现">
+                ImageLoader的实现（2）-ImageLoader的具体实现 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -487,7 +491,7 @@ LRU(Least Recently Used)，LRU是近期最少使用算法">
           
             <div class="site-state-item site-state-posts">
               <a href="/liujiakuoyx.github.io/archives">
-                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-count">8</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
