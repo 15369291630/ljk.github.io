@@ -250,6 +250,151 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="LiuJiaKuo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的学习笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/" itemprop="url">
+                  对象的序列化和Socket简单使用
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-17T19:44:15+08:00">
+                2017-05-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="对象的序列化和Socket简单使用"><a href="#对象的序列化和Socket简单使用" class="headerlink" title="对象的序列化和Socket简单使用"></a>对象的序列化和Socket简单使用</h1><p>对象序列化就是把对象转化为字节序列的过程，相对的反序列化就是把字节序列转化为对象的过程，是把对象转化成容易传输的流的方法，一般是生成传输的字节流或者是IO文件（长期存储）。<br>相信大家在学习一个新知识点之前都会有疑问，这样做的目的是什么。对象序列化的一般利用在对象的远程传输和对象共享。<br>  当两个进程在进行远程通信时，彼此可以发送各种类型的数据。无论是何种类型的数据，都会以二进制序列的形式在网络上传送。发送方需要把这个对象转换为字节序列，才能在网络上传送；接收方则需要把字节序列再恢复为对象。<br>都知道我们的对象存在于我们的内存当中，很多时候我们需要将我们反复使用的属性保存下来，如果我们保存为一个简单的文本文件的话就没有安全性可言，解析数据的时候也会更加复杂。那么文件的序列化存储就使得这个问题变得简单了，我们可以把我们想要保存的属性写进一个类中，创建这个类的对象并把对象序列化存储起来，在我们再次使用的时候直接生成对象（反序列化）就可以使用这些属性。<br>通过上面的方法还有好处就是文件是共享的，我们可以把多进程数据的共享变得简单（对象共享）。<br>很多时候对象需要远程传输，那么我们可以利用对象序列化生成字节序列在网络上传输。</p>
+<p>接下来我们就开始学习一下文件的序列化：</p>
+<p>文件序列化利用ObjectInPutStream和ObjectOutPutSream。这两个类接收一个In/outPutStream参数。<br>要序列化的类必须实现Serializable接口,否则会报错。<br>我新建了一个StudentData类，在这里我实现了Serializable接口 ，并且创建了构造函数、get、set和toString方法：</p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/1.png" alt=""></p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/2.png" alt=""></p>
+<p>我们新建一个测试类：代码很简单，就不再多说了。</p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/3.png" alt=""></p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/4.png" alt=""></p>
+<p>我们再来一个读取的测试类，看看我们能不能成功反序列化出我们的对象：</p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/5.png" alt=""></p>
+<p>接下来我们来学习怎么使我们的对象在网络上传输，网络传输协议目前用的最多的有FTP，HTTP，UDP，Socket原理，其都依赖与TCP/IP协议。<br>FTP跟UDP就不再过多解释，FTP文件传输协议;UDP用户数据报协议（信息类似广播的形式，容易丢失，但是数据传输快）。<br>HTTP（超文本传输协议），简单来说就是客户端与服务器端进行一次连接，然后经行数据的交互，交互完成马上断开连接，服务器端不保存终端的用户信息。<br>Socket（套接字）原理，客户机与服务器端建立一个稳固可靠的长连接，进行时事通信。<br>为了使我们的文件可以被接收，我们可以使用两种方式写一个Wab应用程序。①使用后台语言（jsp、php）写一个HTTP应用，我们客户端可以发起一个HTTP POST请求把我们的对象序列以IO文件的方式上传。②利用JAVA写一个单例Socket连接，把我们的对象流上传到服务器端。考虑到大家应该没有接触过后台语言，所以我们使用第二种方式，相应的Socket的知识点我会注释出来。<br>为了测试，我使用了两个版本的Eclipse，一个运行服务器的代码，一个运行客户端的代码。</p>
+<p>先来写服务器端的代码：前提是你要有服务器或者tomcat，这样才能运行我们的服务器代码。其实知识点很简单，复杂的在操作，我希望大家可以实践一下。<br>这里我做的操作很简单，利用Socket等待一个客户端连接，成功连接后我们拿到客户端的输入流，然后把流解析成对象。（这里指的注意，StudentData这个类在服务器端的代码必须跟客户端的一样，包名也必须一致）；</p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/6.png" alt=""></p>
+<p>代码就这么少，然后我运行到我的TomCat服务器上，可以看到这里程序阻塞住等待客户端接入：</p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/7.png" alt=""></p>
+<p>客户端代码：代码更少。<br>这里做的操作就是先与服务器建立连接，然后拿到对服务的输出流，把我们的对象序列传过去。</p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/8.png" alt=""></p>
+<p>运行后的结果（服务器端）：</p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/9.png" alt=""></p>
+<p>到这里我们就实现了对象的传输。以上是对象序列化的简单使用，一般就够用了，高级的知识点自己可以百度一下看看。<br>最后补充一些知识点，transient关键字修饰的属性可以不被JVM默认序列化(这一点有点复杂有兴趣的可以查查)，其实可以简单理解为需要我们自己序列化，而不是JVM自动序列化</p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/10.png" alt=""></p>
+<p><img src="/liujiakuoyx.github.io/2017/05/17/对象的序列化和Socket简单使用/11.png" alt=""></p>
+<p>我们看到name的值为null；</p>
+<p>△反序列化时JVM到底是根据什么判断我们传输的流对象是不是就是我们想要的类对象呢?<br>在序列化的时候JVM会生成一个serialVersionUID保存在流里面,UID的生成依据了我们包名、类名等等属性。进行反序列化时，Java虚拟机会把传过来的字节流中的serialVersionUID和本地相应实体类的serialVersionUID进行比较，如果相同就认为是一致的实体类，可以进行反序列化，否则Java虚拟机会拒绝对这个实体类进行反序列化并抛出异常。</p>
+<p>以上是对象序列化和Socket的知识点，通过对象序列化可以方便我们数据的储存和传输。Socket可以解决一些长连接即时通讯问题，感兴趣的可以写一个即时聊天程序。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/05/16/ImageLoader的实现（2）-ImageLoader的具体实现/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1308,7 +1453,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/liujiakuoyx.github.io/archives">
-                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1321,7 +1466,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/liujiakuoyx.github.io/tags/index.html">
-                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-count">4</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
