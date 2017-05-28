@@ -250,6 +250,160 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="LiuJiaKuo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的学习笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/" itemprop="url">
+                  Android WebView和JavaScript交互
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-28T21:13:40+08:00">
+                2017-05-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Android-WebView和JavaScript交互"><a href="#Android-WebView和JavaScript交互" class="headerlink" title="Android WebView和JavaScript交互"></a>Android WebView和JavaScript交互</h1><p>现在移动应用几乎都是 Hybrid App（混合模式移动应用）是指介于web-app、native-app这两者之间的app，兼具“Native App良好用户交互体验的优势”和“Web App跨平台开发的优势”。<br>而hybrid的实现关键在于打通Java和JavaScript之间的交互。<br>在Android开发中我们是使用WebView控件来加载HTML页面的，WebView默认为我们提供了让Java和HTML页面中JavaScript脚本交互的能力。</p>
+<h3 id="1-Java调用JavaScript"><a href="#1-Java调用JavaScript" class="headerlink" title="1 Java调用JavaScript"></a>1 Java调用JavaScript</h3><p>java调用JavaScript非常简单，只需要执行下面代码即可。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mWebView.loadUrl(&quot;javascript:methodName(parameterValues)&quot;);</div></pre></td></tr></table></figure>
+<p>不过其中还需要注意几个细节，我们先来看个例子，然后再介绍需要注意的地方。</p>
+<p>IDE：Android Studio</p>
+<p>先写一个H5的页面test.html，把它放在了assets资源文件下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">&lt;!DOCTYPE HTML&gt;</div><div class="line"></div><div class="line">&lt;head&gt;</div><div class="line">    &lt;title&gt;java调用JavaScript&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;!--提供给java调用的方法--&gt;</div><div class="line">&lt;script type=&quot;text/javascript&quot;/&gt;</div><div class="line">    function alertMessage(message) &#123;</div><div class="line">        alert(message)</div><div class="line">    &#125;</div><div class="line">&lt;/script&gt;</div><div class="line"></div><div class="line">&lt;/HTML&gt;</div></pre></td></tr></table></figure>
+<p>xml布局：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</div><div class="line">&lt;LinearLayout</div><div class="line">    android:id=&quot;@+id/id_linearlayout&quot;</div><div class="line">    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;match_parent&quot;</div><div class="line">    android:orientation=&quot;vertical&quot;&gt;</div><div class="line"></div><div class="line">    &lt;Button</div><div class="line">        android:id=&quot;@+id/id_button&quot;</div><div class="line">        android:layout_width=&quot;match_parent&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;alertMessage&quot;/&gt;</div><div class="line"></div><div class="line">    &lt;WebView</div><div class="line">        android:id=&quot;@+id/id_webview&quot;</div><div class="line">        android:layout_width=&quot;match_parent&quot;</div><div class="line">        android:layout_height=&quot;match_parent&quot;&gt;&lt;/WebView&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure>
+<p>Activity代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">public class MyWebView extends AppCompatActivity &#123;</div><div class="line">    private WebView mWebView;</div><div class="line">    private Button mButton;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_my_web_view);</div><div class="line">        mWebView = (WebView) findViewById(R.id.id_webview);</div><div class="line">        mButton = (Button) findViewById(R.id.id_button);</div><div class="line">        loadURL();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void loadURL() &#123;</div><div class="line">        mWebView.setWebViewClient(new WebViewClient());//此方法可以在webview中打开链接而不会跳转到外部浏览器</div><div class="line">        mWebView.setWebChromeClient(new WebChromeClient());//各种内容的渲染需要使用webviewChromClient去实现,比如alert()方法</div><div class="line">        mWebView.loadUrl(&quot;file:///android_asset/test.html&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void initEvents() &#123;</div><div class="line">        mButton.setOnClickListener(new View.OnClickListener() &#123;</div><div class="line">            @Override</div><div class="line">            public void onClick(View v) &#123;</div><div class="line">                mWebView.loadUrl(&quot;javascript:alertMessage(\&quot;&quot;+&quot;Message&quot;+&quot;\&quot;)&quot;);//注意转义字符</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    //重写onKeyDown，当浏览网页，WebView可以后退时执行后退操作。</div><div class="line">    @Override</div><div class="line">    public boolean onKeyDown(int keyCode, KeyEvent event) &#123;</div><div class="line">        if (keyCode == KeyEvent.KEYCODE_BACK &amp;&amp; mWebView.canGoBack()) &#123;</div><div class="line">            mWebView.goBack();</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line">        return super.onKeyDown(keyCode, event);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>需要注意的是setWebViewClient(new WebViewClient())和setWebChromeClient(new WebChromeClient())方法。</p>
+<ul>
+<li>setWebViewClient(new WebViewClient())可以在webview中打开链接而不会跳转到外部浏览器</li>
+<li>setWebChromeClient(new WebChromeClient())方法可以给WebView设置一个WebChromeClient，各种内容的渲染需要使用webviewChromClient去实现,比如alert()方法，如果这个方法没写不会有alert()方法的效果。</li>
+</ul>
+<p><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/01.png" alt=""><br>点击按钮之后效果<br><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/02.png" alt=""></p>
+<h3 id="2-JavaScript调用Java"><a href="#2-JavaScript调用Java" class="headerlink" title="2 JavaScript调用Java"></a>2 JavaScript调用Java</h3><p>WebView提供了一个名为WebSettings的工具类实现让Webview中的JavaScript脚本调用android应用的Java方法，实现方式很简单。</p>
+<ul>
+<li>调用与WebView关联的WebSettings实例的setJavaScriptEnabled方法使能调用的功能</li>
+<li>调用WebView的addJavaScriptInterface方法将应用中的Java对象暴露给JavaScript</li>
+<li>在JavaScript脚本中调用暴露的Java对象的方法</li>
+</ul>
+<p>增加H5页面代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;!DOCTYPE HTML&gt;</div><div class="line"></div><div class="line">&lt;head&gt;</div><div class="line">    &lt;title&gt;h5&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;!--调用java方法--&gt;</div><div class="line">&lt;body&gt;</div><div class="line">    &lt;input type=&quot;button&quot; value=&quot; 打印Log&quot; onclick=&quot; javaObject.printLog(&apos;printLog&apos;);&quot;&gt;</div><div class="line">    &lt;input type=&quot;button&quot; value=&quot; 显示Toast&quot; onclick=&quot; javaObject.showToast();&quot;&gt;</div><div class="line">&lt;/body&gt;</div><div class="line"></div><div class="line">&lt;!--提供给java调用的方法--&gt;</div><div class="line">&lt;script type=&quot;text/javascript&quot;/&gt;</div><div class="line">    function alertMessage(message) &#123;</div><div class="line">        alert(message)</div><div class="line">    &#125;</div><div class="line">&lt;/script&gt;</div><div class="line"></div><div class="line">&lt;/HTML&gt;</div></pre></td></tr></table></figure>
+<p>我们新建提供给JavaScript调用的Java类javaObject</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class javaObject &#123;</div><div class="line">    private Context context;</div><div class="line">    private final String TAG = &quot;javaObjectLog&quot;;</div><div class="line"></div><div class="line">    public javaObject(Context context) &#123;</div><div class="line">        this.context = context;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    public void printLog(String mes)&#123;</div><div class="line">        Log.i(TAG, mes);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    </div><div class="line">    public void showToast()&#123;</div><div class="line">        Toast.makeText(context, &quot;Toast&quot;, Toast.LENGTH_SHORT).show();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>增加Activity代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">public class MyWebView extends AppCompatActivity &#123;</div><div class="line">    private WebView mWebView;</div><div class="line">    private Button mButton;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_my_web_view);</div><div class="line">        mWebView = (WebView) findViewById(R.id.id_webview);</div><div class="line">        mButton = (Button) findViewById(R.id.id_button);</div><div class="line">        loadURL();</div><div class="line">        initEvents();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void initEvents() &#123;</div><div class="line">        mButton.setOnClickListener(new View.OnClickListener() &#123;</div><div class="line">            @Override</div><div class="line">            public void onClick(View v) &#123;</div><div class="line">                mWebView.loadUrl(&quot;javascript:alertMessage(\&quot;&quot;+&quot;Message&quot;+&quot;\&quot;)&quot;);</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void loadURL() &#123;</div><div class="line">        mWebView.setWebViewClient(new WebViewClient());//此方法可以在webview中打开链接而不会跳转到外部浏览器</div><div class="line">        mWebView.setWebChromeClient(new WebChromeClient());//各种内容的渲染需要使用webviewChromClient去实现,比如alert()方法</div><div class="line">        WebSettings webSettings = mWebView.getSettings();//</div><div class="line">        webSettings.setJavaScriptEnabled(true);//</div><div class="line">        mWebView.loadUrl(&quot;file:///android_asset/test.html&quot;);</div><div class="line"></div><div class="line">        mWebView.addJavascriptInterface(new javaObject(this), &quot;javaObject&quot;);//把javaObject类对象暴露给JavaScript</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    //重写onKeyDown，当浏览网页，WebView可以后退时执行后退操作。</div><div class="line">    @Override</div><div class="line">    public boolean onKeyDown(int keyCode, KeyEvent event) &#123;</div><div class="line">        if (keyCode == KeyEvent.KEYCODE_BACK &amp;&amp; mWebView.canGoBack()) &#123;</div><div class="line">            mWebView.goBack();</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line">        return super.onKeyDown(keyCode, event);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/03.png" alt=""></p>
+<p>这种方法是官方提供的，但是却存在极大地安全隐患，所以从Android 4.2开始，Google就修复了这个漏洞，所以如果你测试机是4.2以上你会发现并没有成功调用暴露的方法。我们想要安全的使用上面的方法，唯一需要改动的就是对暴露给JavaScript调用的方法添加@JavascriptInterface注解。修改如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class javaObject &#123;</div><div class="line">    private Context context;</div><div class="line">    private final String TAG = &quot;javaObjectLog&quot;;</div><div class="line"></div><div class="line">    public javaObject(Context context) &#123;</div><div class="line">        this.context = context;</div><div class="line">    &#125;</div><div class="line">    @JavascriptInterface</div><div class="line">    public void printLog(String mes)&#123;</div><div class="line">        Log.i(TAG, mes);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @JavascriptInterface</div><div class="line">    public void showToast()&#123;</div><div class="line">        Toast.makeText(context, &quot;Toast&quot;, Toast.LENGTH_SHORT).show();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>输出结果</p>
+<p><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/04.png" alt=""><br><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/05.png" alt=""></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/05/23/Kotlin初探/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1414,141 +1568,13 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="LiuJiaKuo">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="我的学习笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/" itemprop="url">
-                  Java使用JDBC对数据库操作简介
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-14T22:07:48+08:00">
-                2017-03-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="Java利用JDBC数据库操作"><a href="#Java利用JDBC数据库操作" class="headerlink" title="Java利用JDBC数据库操作"></a>Java利用JDBC数据库操作</h1><p>在学习之前我们首先了解一下什么是JDBC，JDBC有什么用。</p>
-<h3 id="JDBC是什么"><a href="#JDBC是什么" class="headerlink" title="JDBC是什么"></a>JDBC是什么</h3><ul>
-<li>JDBC（Java Data Base Connectivity,java数据库连接）是一种用于执行SQL语句的Java API。</li>
-</ul>
-<blockquote>
-<p>简单来说JDBC提供给我们程序对数据库之间的桥梁，使我们的程序操作数据库变得简单。利用JDBC可以使我们方便的操作数据库。</p>
-</blockquote>
-<h3 id="使用JDBC的好处"><a href="#使用JDBC的好处" class="headerlink" title="使用JDBC的好处"></a>使用JDBC的好处</h3><p>有了JDBC，向各种关系数据发送SQL语句就是一件很容易的事。换言之，有了JDBC API，就不必为访问Sybase数据库专门写一个程序，为访问Oracle数据库又专门写一个程序，或为访问Informix数据库又编写另一个程序等等，我们只需用JDBC API写一个程序就够了，它可向相应数据库发送SQL调用。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/liujiakuoyx.github.io/2017/03/14/Java使用JDBC对数据库操作简介/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/liujiakuoyx.github.io/page/2/">2</a><a class="extend next" rel="next" href="/liujiakuoyx.github.io/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
           
           </div>
@@ -1591,7 +1617,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/liujiakuoyx.github.io/archives">
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
