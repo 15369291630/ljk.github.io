@@ -93,16 +93,16 @@
 <meta property="og:url" content="http://github.com/2017/05/28/Android-WebView和JavaScript交互/index.html">
 <meta property="og:site_name" content="我的学习笔记">
 <meta property="og:description" content="Android WebView和JavaScript交互现在移动应用几乎都是 Hybrid App（混合模式移动应用）是指介于web-app、native-app这两者之间的app，兼具“Native App良好用户交互体验的优势”和“Web App跨平台开发的优势”。而hybrid的实现关键在于打通Java和JavaScript之间的交互。在Android开发中我们是使用WebView控件来加载">
-<meta property="og:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/01.png">
-<meta property="og:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/02.png">
-<meta property="og:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/03.png">
-<meta property="og:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/04.png">
+<meta property="og:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/01.jpg">
+<meta property="og:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/02.jpg">
+<meta property="og:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/03.jpg">
+<meta property="og:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/04.jpg">
 <meta property="og:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/05.png">
-<meta property="og:updated_time" content="2017-05-28T14:09:46.990Z">
+<meta property="og:updated_time" content="2017-05-28T14:12:28.223Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android WebView和JavaScript交互">
 <meta name="twitter:description" content="Android WebView和JavaScript交互现在移动应用几乎都是 Hybrid App（混合模式移动应用）是指介于web-app、native-app这两者之间的app，兼具“Native App良好用户交互体验的优势”和“Web App跨平台开发的优势”。而hybrid的实现关键在于打通Java和JavaScript之间的交互。在Android开发中我们是使用WebView控件来加载">
-<meta name="twitter:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/01.png">
+<meta name="twitter:image" content="http://github.com/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/01.jpg">
 
 
 
@@ -343,7 +343,7 @@
 <li>setWebViewClient(new WebViewClient())可以在webview中打开链接而不会跳转到外部浏览器</li>
 <li>setWebChromeClient(new WebChromeClient())方法可以给WebView设置一个WebChromeClient，各种内容的渲染需要使用webviewChromClient去实现,比如alert()方法，如果这个方法没写不会有alert()方法的效果。</li>
 </ul>
-<p><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/01.png" alt=""><br>点击按钮之后效果<br><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/02.png" alt=""></p>
+<p><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/01.jpg" alt=""><br>点击按钮之后效果<br><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/02.jpg" alt=""></p>
 <h3 id="2-JavaScript调用Java"><a href="#2-JavaScript调用Java" class="headerlink" title="2 JavaScript调用Java"></a>2 JavaScript调用Java</h3><p>WebView提供了一个名为WebSettings的工具类实现让Webview中的JavaScript脚本调用android应用的Java方法，实现方式很简单。</p>
 <ul>
 <li>调用与WebView关联的WebSettings实例的setJavaScriptEnabled方法使能调用的功能</li>
@@ -356,11 +356,11 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class javaObject &#123;</div><div class="line">    private Context context;</div><div class="line">    private final String TAG = &quot;javaObjectLog&quot;;</div><div class="line"></div><div class="line">    public javaObject(Context context) &#123;</div><div class="line">        this.context = context;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    public void printLog(String mes)&#123;</div><div class="line">        Log.i(TAG, mes);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    </div><div class="line">    public void showToast()&#123;</div><div class="line">        Toast.makeText(context, &quot;Toast&quot;, Toast.LENGTH_SHORT).show();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>增加Activity代码</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line">public class MyWebView extends AppCompatActivity &#123;</div><div class="line">    private WebView mWebView;</div><div class="line">    private Button mButton;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_my_web_view);</div><div class="line">        mWebView = (WebView) findViewById(R.id.id_webview);</div><div class="line">        mButton = (Button) findViewById(R.id.id_button);</div><div class="line">        loadURL();</div><div class="line">        initEvents();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void initEvents() &#123;</div><div class="line">        mButton.setOnClickListener(new View.OnClickListener() &#123;</div><div class="line">            @Override</div><div class="line">            public void onClick(View v) &#123;</div><div class="line">                mWebView.loadUrl(&quot;javascript:alertMessage(\&quot;&quot;+&quot;Message&quot;+&quot;\&quot;)&quot;);</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void loadURL() &#123;</div><div class="line">        mWebView.setWebViewClient(new WebViewClient());//此方法可以在webview中打开链接而不会跳转到外部浏览器</div><div class="line">        mWebView.setWebChromeClient(new WebChromeClient());//各种内容的渲染需要使用webviewChromClient去实现,比如alert()方法</div><div class="line">        WebSettings webSettings = mWebView.getSettings();//</div><div class="line">        webSettings.setJavaScriptEnabled(true);//</div><div class="line">        mWebView.loadUrl(&quot;file:///android_asset/test.html&quot;);</div><div class="line"></div><div class="line">        mWebView.addJavascriptInterface(new javaObject(this), &quot;javaObject&quot;);//把javaObject类对象暴露给JavaScript</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    //重写onKeyDown，当浏览网页，WebView可以后退时执行后退操作。</div><div class="line">    @Override</div><div class="line">    public boolean onKeyDown(int keyCode, KeyEvent event) &#123;</div><div class="line">        if (keyCode == KeyEvent.KEYCODE_BACK &amp;&amp; mWebView.canGoBack()) &#123;</div><div class="line">            mWebView.goBack();</div><div class="line">            return true;</div><div class="line">        &#125;</div><div class="line">        return super.onKeyDown(keyCode, event);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/03.png" alt=""></p>
+<p><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/03.jpg" alt=""></p>
 <p>这种方法是官方提供的，但是却存在极大地安全隐患，所以从Android 4.2开始，Google就修复了这个漏洞，所以如果你测试机是4.2以上你会发现并没有成功调用暴露的方法。我们想要安全的使用上面的方法，唯一需要改动的就是对暴露给JavaScript调用的方法添加@JavascriptInterface注解。修改如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class javaObject &#123;</div><div class="line">    private Context context;</div><div class="line">    private final String TAG = &quot;javaObjectLog&quot;;</div><div class="line"></div><div class="line">    public javaObject(Context context) &#123;</div><div class="line">        this.context = context;</div><div class="line">    &#125;</div><div class="line">    @JavascriptInterface</div><div class="line">    public void printLog(String mes)&#123;</div><div class="line">        Log.i(TAG, mes);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @JavascriptInterface</div><div class="line">    public void showToast()&#123;</div><div class="line">        Toast.makeText(context, &quot;Toast&quot;, Toast.LENGTH_SHORT).show();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>输出结果</p>
-<p><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/04.png" alt=""><br><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/05.png" alt=""></p>
+<p><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/04.jpg" alt=""><br><img src="/liujiakuoyx.github.io/2017/05/28/Android-WebView和JavaScript交互/05.png" alt=""></p>
 
       
     </div>
@@ -412,6 +412,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/liujiakuoyx.github.io/2017/06/06/自定义FlowLayout/" rel="prev" title="自定义FlowLayout">
+                自定义FlowLayout <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -483,7 +487,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/liujiakuoyx.github.io/archives">
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">12</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
