@@ -250,6 +250,183 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/07/14/UDP穿透NAT实现p2p/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="LiuJiaKuo">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="我的学习笔记">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/liujiakuoyx.github.io/2017/07/14/UDP穿透NAT实现p2p/" itemprop="url">
+                  UDP穿透NAT实现p2p
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-14T10:17:05+08:00">
+                2017-07-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="什么是NAT"><a href="#什么是NAT" class="headerlink" title="什么是NAT"></a>什么是NAT</h3><p>NAT（Network Address Translation），网络地址转换。是1994年提出的。当在专用网内部的一些主机本来已经分配到了本地IP地址（即仅在本专用网内使用的专用地址），但现在又想和因特网上的主机通信（并不需要加密）时，可使用NAT方法。<br>。装有NAT软件的路由器叫做NAT路由器，它至少有一个有效的外部全球IP地址。这样，所有使用本地地址的主机在和外界通信时，都要在NAT路由器上将其本地地址转换成全球IP地址，才能和因特网连接。<br>同样还有NAPT，网络地址、端口转换。现在一般穿透规则就是通过获取ip、端口来实现的，重点是实现穿透，所以以下统称NAT即可。</p>
+<h4 id="为什么要穿透NAT"><a href="#为什么要穿透NAT" class="headerlink" title="为什么要穿透NAT"></a>为什么要穿透NAT</h4><p>NAT可以有效的减缓全球IP枯竭的问题。但是同时NAT也屏蔽了内部设备。</p>
+<p>比如在局域网A下有一个内网IP地址为192.168.1.155的设备A，现在一个设备B想要访问这个设备A，根据设备B所在网络可分为一下情况。</p>
+<ul>
+<li>设备B同在局域网A中：<br>设备B可直接通过设备内网ip 192.168.1.155 地址访问设备A；</li>
+<li>设备B在外网：<br>设备B无法通过设备A内网访问设备A；</li>
+<li>设备B在不同局域网A的局域网B中：<br>设备B在通过ip 192.168.1.155 访问的时候可能访问到局域网B下内网IP也为192.168.1.155的设备C，也可能找不到该ip，但是无法访问设备A。</li>
+</ul>
+<p>这就是为什么在内网建立一个tcp或者udp服务，内网客户端可以通过ip和端口号直接通信，而外网却无法访问该内网建立的服务。<br>要实现p2p（Peer to Peer），首先我们的要知道客户端ip和端口号，但是通过局域网路由器的NAT转换，生成的外网ip和端口我们无法预知，这样我们就无法建立p2p连接。</p>
+<h4 id="NAT转换"><a href="#NAT转换" class="headerlink" title="NAT转换"></a>NAT转换</h4><p>如果你还是不明白NAT为什么屏蔽了内部设备，接下来举个NAT转换例子就明白了。<br>例：<br>内网机器A ip（192.168.1.188） 端口（9999）  -  访问外网目标主机B ip（220.233.28.42） 端口（8888）：</p>
+<p>1.数据包</p>
+<p>目的主机：220.233.28.42<br>目的端口：8888</p>
+<p>源主机：192.168.1.188<br>源端口：9999            （用户自定义或随机）</p>
+<p>2.地址转换</p>
+<p>目的主机：220.233.28.42<br>目的端口：8888</p>
+<p>源主机：123.206.41.242  （NAT转换，为路由器外网ip）<br>源端口：17309           （NAT转换）</p>
+<p>3.记录地址映射（包含指向）</p>
+<p>192.168.1.188：9999 &lt;–&gt; 123.206.41.242：17309</p>
+<p>4.外网主机B向内网主机A返回响应消息</p>
+<p>目的主机：123.206.41.242<br>目的端口：17309</p>
+<p>源主机：220.233.28.42<br>源端口：8888</p>
+<p>5.NAT查找地址映像并转换</p>
+<p>目的主机：192.168.1.188<br>目的端口：9999</p>
+<p>源主机：220.233.28.42<br>源端口：8888</p>
+<p>通过地址转换，主机A的内网地址被映射之后我们是无法预知的，而且我们无法通过主机A的内外网地址直接访问A，所以NAT屏蔽了主机A。</p>
+<p>通过例子可以看到，当主机A访问外网主机B时，通过NAT随机分配一个（外网ip为路由器外网ip）端口，这样就把内网地址映射成了一个唯一的外网地址。然后外网主机B响应主机A时，主机B不直接访问主机A，而是通过NAT转换后的地址访问路由器，路由器就会通过映射把数据分配给内网主机A。这也就是NAT穿透的原理。</p>
+<h3 id="NAT穿透原理"><a href="#NAT穿透原理" class="headerlink" title="NAT穿透原理"></a>NAT穿透原理</h3><p>通过双方所在网络环境不同可分为一下模式：</p>
+<ul>
+<li>一个在局域网，另一个在外网</li>
+<li>都在不同的局域网</li>
+<li>都在相同的局域网</li>
+</ul>
+<p>上一章节已经提到了一种穿透方式，即：局域网-外网的访问模式，因为主机B在外网，ip端口确定，主机A可以直接通过B的外网地址访问B，外网主机B首先接受到了主机A的数据包，便可以知道主机A经过NAT转化后的外网地址，然后就可以进行相互通信。<br>但是如果双方都在不同的局域网，互相都不知道自己的外网地址怎么办。<br>这种情况就需要利用一个拥有唯一IP的中间服务器S，因为S ip固定并且已知，就让两个设备都向S发送数据包，S就可以的知道两个设备的公网ip，在设备p2p通信之前先去服务器查找对方的ip、端口，就可以实现通信。<br>两个设备同时处在同一个局域网下，可以不通过NAT，直接用内网ip进行通信，这是最节省带宽的方式。当然，也可以通过第二种，通过S服务器来得到外网ip端口，这种情况外网的IP是相同的(同一个路由器)，只是分配的端口不同。</p>
+<p>发送数据的方式利用UDP，虽然UDP不可靠，但是UDP可以轻松实现穿透。通过浏览各大博客，都没有找到通过TCP实现穿透的项目，甚至有人说TCP几乎不可能实现穿透（博主初学，还望指点）。</p>
+<p>使用过UDP的肯定知道，首先创建一个UDP监听端口，然后可以通过这个端口发送和接收数据包。NAT会把这个监听端口映射为外网ip和端口。我们只需要通过端口发送数据包给服务器就可以让服务器拿到这个端口信息，然后可以让其他客户机通过这个端口的信息来发送数据给该端口。</p>
+<p>在这里NAPT对UDP的端口映射（session）还有一定的规则：</p>
+<ul>
+<li>A.源地址（内网ip）不相同，忽略其他因素，则session不同。</li>
+<li>B.源地址相同，源端口不同，忽略其他因素，则session不同。</li>
+<li>C.源地址相同，源端口相同，目标地址不同，对于不同的NAPT，session可能不同。（一般大部分是相同的，不同的无法进行穿透）</li>
+<li>D.源地址相同，源端口相同，目标地址相同，任何端口，session一定相同。</li>
+</ul>
+<p>session并不是长期存在的，不同的路由器session储存时间不同，短的有的几十秒，长的可能有的几分种。要想维持这个session可以通过心跳包来维持，比如10秒向服务器发送一个心跳包。</p>
+<h3 id="NAT穿透UDP具体实现"><a href="#NAT穿透UDP具体实现" class="headerlink" title="NAT穿透UDP具体实现"></a>NAT穿透UDP具体实现</h3><p>本来是打算把我的java代码黏贴出来的，后来想了想，我写的只是其中一种实现方式，不同语言也有不同的实现方式，我就来说说实现的步骤，就不再写代码了。也挺简单的。</p>
+<ol>
+<li>客户端建立一个UDP监听端口</li>
+<li>客户端做一个心跳包向服务器发送数据包</li>
+<li>服务器接收到心跳包后，储存客户端的ip、端口信息</li>
+</ol>
+<p>当客户端要进行p2p通信的时候</p>
+<ol>
+<li>发送方服务器查询接收方ip、端口</li>
+<li>数据包定向ip、端口发送数据包</li>
+<li>完成通信</li>
+</ol>
+<h3 id="注意-重点"><a href="#注意-重点" class="headerlink" title="注意 重点"></a>注意 重点</h3><p>到此，你以为结束了？ 那就大错特错了。<br>到这里你会发现，接收方（以下统称A）可能拿不到数据包，这种情况出现在接收方在局域网内（需要穿透NAT）。<br>这是为什么？<br>这是因为NAT丢弃了你这个来源不明的包，根本没有分发给接收设备A。<br>为什么叫来源不明呢，这是因为首先A的UDP端口给服务器发数据包，A的NAT创建了一个session，这样A再接收到服务器的数据时，会查找这个映射（A&lt;—&gt;服务器），这个映射就储存在这个session里。但是发送方（B）向A的NAT发送数据（这是在B的NAT建立对A的映射），没有指向B的映射，所以数据包被A的NAT丢弃。<br>那怎么解决呢，其实让A也向B发一个数据包就好了，这样A的NAT会建立一个对B的session，这样再收到B的数据NAT就可以查找到对应的映射了。</p>
+<p>之前提到的NAPT对UDP的session映射，源地址相同，源端口相同，目标地址不同，对于不同的NAPT，session可能不同。这条规则是依据不同的NAT的。Symmetric NAPT会导致session不同，Cone NAPT则是相同的。对于p2p只要一方使用的是Symmetric NAPT就会导致无法穿透。具体可自行百度。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/06/06/自定义FlowLayout/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1447,134 +1624,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://github.com/liujiakuoyx.github.io/2017/03/15/Android跨程序共享数据，探究内容提供器/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="LiuJiaKuo">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://bimg.tubaba.com.cn/http://img0.imgtn.bdimg.com/it/u=1833888543,3337133659&fm=23&gp=0.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="我的学习笔记">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/liujiakuoyx.github.io/2017/03/15/Android跨程序共享数据，探究内容提供器/" itemprop="url">
-                  Android跨程序共享数据，探究内容提供器
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-03-15T19:14:54+08:00">
-                2017-03-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="Android跨程序共享数据，探究内容提供器"><a href="#Android跨程序共享数据，探究内容提供器" class="headerlink" title="Android跨程序共享数据，探究内容提供器"></a>Android跨程序共享数据，探究内容提供器</h1><blockquote>
-<p>《Android第一行代码》</p>
-</blockquote>
-<h2 id="内容提供器简介"><a href="#内容提供器简介" class="headerlink" title="内容提供器简介"></a>内容提供器简介</h2><p>内容提供器（Content Provider）主要用于在不同的应用程序之间实现数据共享的功能，它提供了一套完整的机制，允许一个程序访问另一个程序中的数据，同时还能够保证被访问数据的安全性。目前，使用内容提供器是Android实现扩平台共享数据的标准方式。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/liujiakuoyx.github.io/2017/03/15/Android跨程序共享数据，探究内容提供器/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -1624,7 +1673,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/liujiakuoyx.github.io/archives">
-                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
